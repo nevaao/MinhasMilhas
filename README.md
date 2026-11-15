@@ -21,7 +21,7 @@ Ative cada provedor em *Authentication → Sign In / Providers* no Supabase (é 
 
 ## Publicação
 
-Importe o repositório na Vercel ou Netlify, defina as variáveis `VITE_*` e use `npm run build` (saída em `dist`). Em Vercel, adicione uma regra de reescrita de todas as rotas para `/index.html`.
+Importe o repositório na Vercel (ela publica o branch `main` a cada merge), defina as variáveis `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` e mantenha o comando `npm run build` com saída em `dist`. O arquivo `vercel.json` já redireciona todas as rotas para `/index.html`. Depois do deploy, coloque o endereço gerado em *Authentication → URL Configuration* no Supabase.
 
 ## Como o milheiro é calculado
 
