@@ -1,4 +1,6 @@
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { ChevronRight, Tag, Wallet } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { supabase } from '../lib/supabase'
 import { useTheme, type ThemePref } from '../lib/theme'
@@ -24,7 +26,18 @@ export default function Settings() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
-      <PageHeader title="Ajustes" subtitle="Tema, dados e conta." />
+      <PageHeader title="Ajustes" subtitle="Contas, categorias, tema, dados e conta." />
+      <FadeUp i={0} className="card divide-y divide-line/60 overflow-hidden md:hidden">
+        {[['/contas', 'Contas', Wallet], ['/categorias', 'Categorias', Tag]].map(([to, label, I]) => {
+          const Ico = I as typeof Wallet
+          return (
+            <Link key={to as string} to={to as string} className="flex items-center gap-3 px-4 py-3.5 active:bg-line/30">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent"><Ico className="h-5 w-5" /></span>
+              <span className="flex-1 font-medium">{label as string}</span><ChevronRight className="h-5 w-5 text-muted" />
+            </Link>
+          )
+        })}
+      </FadeUp>
       <FadeUp i={1} className="card space-y-3 p-4">
         <h2 className="font-semibold">Tema</h2>
         <div className="grid grid-cols-3 gap-1 rounded-2xl bg-line/50 p-1">

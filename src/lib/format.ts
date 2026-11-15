@@ -16,3 +16,4 @@ export const parseNum = (s: string) => {
   const v = Number(String(s).replace(/\./g, '').replace(',', '.'))
   return Number.isFinite(v) ? v : 0
 }
+export const normText = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()

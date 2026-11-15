@@ -4,8 +4,8 @@ import { motion } from 'framer-motion'
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight } from 'lucide-react'
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useAccounts, useCategories, useLedgers, useTransactions } from '../data/hooks'
-import { evolution } from '../lib/ledger'
-import { fmtBRL, fmtDate, fmtPoints } from '../lib/format'
+import { evolution, filterEvolution, type PeriodKey } from '../lib/ledger'
+import { fmtBRL, fmtDate, fmtPoints, today } from '../lib/format'
 import { Badge } from '../components/Icon'
 import TxRow from '../components/TxRow'
 import PageHeader from '../components/PageHeader'
@@ -26,6 +26,8 @@ export default function Dashboard() {
   const { data: txs = [], isLoading: lt } = useTransactions()
   const { rows, states, costOut } = useLedgers()
   const [sel, setSel] = useState('all')
+  const [period, setPeriod] = useState<PeriodKey>('year')
+  const [yearPick, setYearPick] = useState('')
 
   const active = accounts.filter((a) => !a.archived)
   const totals = useMemo(() => {
@@ -34,10 +36,15 @@ export default function Dashboard() {
     return { p, c, m: p > 0 ? (c / p) * 1000 : 0 }
   }, [active, states])
 
+  const years = useMemo(() => [...new Set(txs.map((t) => t.date.slice(0, 4)))].sort().reverse(), [txs])
+  const year = yearPick || years[0] || today().slice(0, 4)
+
   const chart = useMemo(() => {
     const subset = sel === 'all' ? Object.fromEntries(Object.entries(rows).filter(([id]) => active.some((a) => a.id === id))) : { [sel]: rows[sel] ?? [] }
-    return evolution(subset).map((d) => ({ ...d, label: fmtDate(d.date).slice(0, 5) + '/' + d.date.slice(2, 4), milheiro: +d.milheiro.toFixed(2) }))
-  }, [rows, sel, active])
+    const pts = filterEvolution(evolution(subset), period, year, today())
+    const span = pts.length > 1 ? (+new Date(pts[pts.length - 1].date) - +new Date(pts[0].date)) / 864e5 : 0
+    return pts.map((d) => ({ ...d, label: span > 370 ? `${d.date.slice(5, 7)}/${d.date.slice(2, 4)}` : fmtDate(d.date).slice(0, 5), milheiro: +d.milheiro.toFixed(2) }))
+  }, [rows, sel, active, period, year])
 
   const recent = [...txs].sort((a, b) => b.date.localeCompare(a.date) || b.created_at.localeCompare(a.created_at)).slice(0, 8)
   const loading = la || lt
@@ -90,9 +97,15 @@ export default function Dashboard() {
       <FadeUp i={3} className="card mt-6 p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-semibold">Pontos × milheiro</h2>
-          <Select variant="chip" ariaLabel="Conta do gráfico" value={sel} onChange={setSel} options={[{ value: 'all', label: 'Todas as contas' }, ...active.map((a) => ({ value: a.id, label: a.name, color: a.color }))]} />
+          <div className="flex flex-wrap items-center gap-2">
+            <Select variant="chip" ariaLabel="Período do gráfico" value={period} onChange={(v) => setPeriod(v as PeriodKey)} options={[
+              { value: 'week', label: 'Última semana' }, { value: 'month', label: 'Último mês' }, { value: 'quarter', label: 'Último trimestre' },
+              { value: 'year', label: 'Último ano' }, { value: 'calendar', label: 'Ano específico' }, { value: 'all', label: 'Todo o período' }]} />
+            {period === 'calendar' && <Select variant="chip" ariaLabel="Ano do gráfico" value={year} onChange={setYearPick} options={(years.length ? years : [year]).map((y) => ({ value: y, label: y }))} />}
+            <Select variant="chip" ariaLabel="Conta do gráfico" value={sel} onChange={setSel} options={[{ value: 'all', label: 'Todas as contas' }, ...active.map((a) => ({ value: a.id, label: a.name, color: a.color }))]} />
+          </div>
         </div>
-        {chart.length < 2 ? <p className="py-10 text-center text-sm text-muted">O gráfico aparece quando houver registros em pelo menos duas datas.</p> : (
+        {chart.length < 2 ? <p className="py-10 text-center text-sm text-muted">Sem dados para este período.</p> : (
           <div className="h-64">
             <ResponsiveContainer>
               <ComposedChart data={chart} margin={{ left: 0, right: 0, top: 8 }}>
@@ -100,7 +113,7 @@ export default function Dashboard() {
                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: 'rgb(var(--muted))' }} stroke="rgb(var(--line))" minTickGap={24} />
                 <YAxis yAxisId="p" tick={{ fontSize: 11, fill: 'rgb(var(--muted))' }} stroke="rgb(var(--line))" width={46} tickFormatter={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)} />
                 <YAxis yAxisId="m" orientation="right" tick={{ fontSize: 11, fill: 'rgb(var(--muted))' }} stroke="rgb(var(--line))" width={40} />
-                <Tooltip contentStyle={{ background: 'rgb(var(--surface))', border: '1px solid rgb(var(--line))', borderRadius: 12, fontSize: 12 }}
+                <Tooltip labelFormatter={(_, p) => (p?.[0]?.payload?.date ? fmtDate(p[0].payload.date) : '')} contentStyle={{ background: 'rgb(var(--surface))', border: '1px solid rgb(var(--line))', borderRadius: 12, fontSize: 12 }}
                   formatter={(v, n) => (n === 'Pontos' ? [fmtPoints(Number(v)), 'Pontos'] : [fmtBRL(Number(v)), 'Milheiro'])} />
                 <Bar yAxisId="p" dataKey="pontos" name="Pontos" fill="rgb(var(--muted) / 0.35)" radius={[4, 4, 0, 0]} animationDuration={900} />
                 <Line yAxisId="m" dataKey="milheiro" name="Milheiro" stroke="rgb(var(--accent))" strokeWidth={3} dot={false} type="monotone" animationDuration={1200} />
