@@ -10,9 +10,9 @@ const must = <T,>(r: { data: T; error: { message: string } | null }) => {
 }
 
 const DEFAULT_ACCOUNTS = [
-  { name: 'Livelo', color: '#EC008C', icon: 'brand:livelo' },
-  { name: 'Smiles', color: '#FF7A00', icon: 'brand:smiles' },
-  { name: 'LATAM Pass', color: '#D4003C', icon: 'brand:latam' },
+  { name: 'Livelo', color: '#FF0A8C', icon: 'brand:livelo' },
+  { name: 'Smiles', color: '#E8661C', icon: 'brand:smiles' },
+  { name: 'LATAM Pass', color: '#5A0F55', icon: 'brand:latam' },
 ]
 const DEFAULT_CATEGORIES = [
   { name: 'Cartão de crédito', color: '#2563eb', icon: 'credit-card' },

@@ -33,7 +33,9 @@ export function Badge({ color, icon, size = 32 }: { color: string; icon: string;
     const b = brandById(icon.slice(BRAND_PREFIX.length))
     if (b) {
       return (
-        <span className="inline-flex shrink-0 items-center justify-center rounded-xl font-display font-bold tracking-tight" style={{ width: size, height: size, background: b.bg, color: b.fg ?? '#fff', fontSize: size * 0.38 }}>{b.mark}</span>
+        <span className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line/60 bg-white" style={{ width: size, height: size }}>
+          <img src={b.logo} alt="" className="h-full w-full object-cover" />
+        </span>
       )
     }
   }
@@ -67,13 +69,13 @@ export function ColorIconPicker(props: { color: string; icon: string; onColor: (
       )}
       {tab === 'logo' && props.logos ? (
         <div className="space-y-3">
-          <div className="grid max-h-60 grid-cols-3 gap-2 overflow-y-auto rounded-xl border border-line/60 p-2 sm:grid-cols-4">
+          <div className="grid grid-cols-4 gap-2 rounded-xl border border-line/60 p-2">
             {BRANDS.map((b) => {
               const on = props.icon === BRAND_PREFIX + b.id
               return (
-                <button type="button" key={b.id} onClick={() => { props.onIcon(BRAND_PREFIX + b.id); props.onColor(b.bg) }} aria-label={b.name} aria-pressed={on}
+                <button type="button" key={b.id} onClick={() => { props.onIcon(BRAND_PREFIX + b.id); props.onColor(b.color) }} aria-label={b.name} aria-pressed={on}
                   className={`flex flex-col items-center gap-1.5 rounded-xl border p-2 text-center ${on ? 'border-accent bg-accent/10' : 'border-transparent hover:bg-line/40'}`}>
-                  <Badge color={b.bg} icon={BRAND_PREFIX + b.id} size={40} />
+                  <Badge color={b.color} icon={BRAND_PREFIX + b.id} size={44} />
                   <span className="line-clamp-2 text-[11px] leading-tight text-muted">{b.name}</span>
                 </button>
               )
@@ -86,7 +88,7 @@ export function ColorIconPicker(props: { color: string; icon: string; onColor: (
             </label>
             {props.icon.startsWith(IMG_PREFIX) && <Badge color={props.color} icon={props.icon} size={40} />}
           </div>
-          <p className="text-xs text-muted">Os selos usam as iniciais e a cor aproximada de cada plataforma. Para ver o logotipo oficial, envie a imagem aqui (PNG, JPG ou SVG).</p>
+          <p className="text-xs text-muted">Escolha uma plataforma ou envie seu próprio logo (PNG, JPG, SVG ou WebP).</p>
           {err && <p role="alert" className="text-sm text-danger">{err}</p>}
         </div>
       ) : (

@@ -54,7 +54,7 @@ export default function ImportXlsx() {
         let acc = matchAccount(s.sheet)
         if (!acc) {
           const brand = brandForName(s.sheet)
-          const { data, error } = await supabase.from('accounts').insert({ name: s.sheet, color: brand?.bg ?? '#64748b', icon: brand ? BRAND_PREFIX + brand.id : 'plane' }).select().single()
+          const { data, error } = await supabase.from('accounts').insert({ name: s.sheet, color: brand?.color ?? '#64748b', icon: brand ? BRAND_PREFIX + brand.id : 'plane' }).select().single()
           if (error) throw new Error(error.message)
           acc = data
         }

@@ -1,38 +1,11 @@
-/**
- * Plataformas de pontos e milhas. Não são os logotipos oficiais: cada uma é um selo com as
- * iniciais e uma cor aproximada da marca. Para usar o logotipo real, envie a imagem na conta.
- */
-export interface Brand { id: string; name: string; mark: string; bg: string; fg?: string }
+/** Plataformas disponíveis como logo da conta (imagens em public/logos). */
+export interface Brand { id: string; name: string; logo: string; color: string }
 
 export const BRANDS: Brand[] = [
-  { id: 'livelo', name: 'Livelo', mark: 'Li', bg: '#EC008C' },
-  { id: 'smiles', name: 'Smiles', mark: 'Sm', bg: '#FF7A00' },
-  { id: 'latam', name: 'LATAM Pass', mark: 'LA', bg: '#D4003C' },
-  { id: 'azul', name: 'Azul Fidelidade', mark: 'Az', bg: '#0033A0' },
-  { id: 'esfera', name: 'Esfera', mark: 'Es', bg: '#009C8C' },
-  { id: 'iupp', name: 'Iupp', mark: 'Iu', bg: '#FF6200' },
-  { id: 'dotz', name: 'Dotz', mark: 'Do', bg: '#F15A29' },
-  { id: 'kmv', name: 'Km de Vantagens', mark: 'Km', bg: '#0B5FA5' },
-  { id: 'c6', name: 'C6 Átomos', mark: 'C6', bg: '#242424' },
-  { id: 'inter', name: 'Inter Loop', mark: 'In', bg: '#FF7A00' },
-  { id: 'nubank', name: 'Nubank Rewards', mark: 'Nu', bg: '#820AD1' },
-  { id: 'amex', name: 'Membership Rewards', mark: 'MR', bg: '#006FCF' },
-  { id: 'aadvantage', name: 'AAdvantage', mark: 'AA', bg: '#0078D2' },
-  { id: 'united', name: 'MileagePlus', mark: 'UA', bg: '#1C3F94' },
-  { id: 'delta', name: 'SkyMiles', mark: 'DL', bg: '#C01933' },
-  { id: 'flyingblue', name: 'Flying Blue', mark: 'FB', bg: '#002060' },
-  { id: 'tap', name: 'TAP Miles&Go', mark: 'TP', bg: '#D2232A' },
-  { id: 'iberia', name: 'Iberia Plus', mark: 'Ib', bg: '#D7192D' },
-  { id: 'lifemiles', name: 'LifeMiles', mark: 'LM', bg: '#DA291C' },
-  { id: 'copa', name: 'ConnectMiles', mark: 'CM', bg: '#0072CE' },
-  { id: 'emirates', name: 'Emirates Skywards', mark: 'EK', bg: '#D71921' },
-  { id: 'qatar', name: 'Privilege Club', mark: 'QR', bg: '#5C0632' },
-  { id: 'turkish', name: 'Miles&Smiles', mark: 'TK', bg: '#C70A0C' },
-  { id: 'accor', name: 'Accor ALL', mark: 'AL', bg: '#2A2A5E' },
-  { id: 'bonvoy', name: 'Marriott Bonvoy', mark: 'MB', bg: '#9B1B30' },
-  { id: 'hilton', name: 'Hilton Honors', mark: 'HH', bg: '#104C97' },
-  { id: 'ihg', name: 'IHG One Rewards', mark: 'IH', bg: '#2E7D4F' },
-  { id: 'shell', name: 'Shell Box', mark: 'Sh', bg: '#FBCE07', fg: '#1a1a1a' },
+  { id: 'livelo', name: 'Livelo', logo: '/logos/livelo.png', color: '#FF0A8C' },
+  { id: 'smiles', name: 'Smiles', logo: '/logos/smiles.jpg', color: '#E8661C' },
+  { id: 'latam', name: 'LATAM Pass', logo: '/logos/latam.jpg', color: '#5A0F55' },
+  { id: 'azul', name: 'Azul Fidelidade', logo: '/logos/azul.jpg', color: '#0A6BD1' },
 ]
 
 export const brandById = (id: string) => BRANDS.find((b) => b.id === id)
