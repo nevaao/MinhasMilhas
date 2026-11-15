@@ -1,39 +1,65 @@
-import { NavLink, Outlet, Link } from 'react-router-dom'
-import { LayoutDashboard, List, Wallet, Tag, Settings, Plus } from 'lucide-react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { LayoutDashboard, List, Wallet, Settings, Tag, Plus } from 'lucide-react'
+import { OverlayLink } from './motion'
 
-const nav = [
+const tabs = [
   { to: '/', label: 'Resumo', icon: LayoutDashboard },
   { to: '/registros', label: 'Registros', icon: List },
   { to: '/contas', label: 'Contas', icon: Wallet },
-  { to: '/categorias', label: 'Categorias', icon: Tag },
   { to: '/config', label: 'Ajustes', icon: Settings },
 ]
+const side = [...tabs.slice(0, 3), { to: '/categorias', label: 'Categorias', icon: Tag }, tabs[3]]
 
-export default function Layout() {
+function Tab({ to, label, icon: I, id }: { to: string; label: string; icon: typeof List; id: string }) {
   return (
-    <div className="flex min-h-full">
-      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col gap-1 border-r border-line p-4 md:flex">
-        <div className="mb-4 px-2 font-display text-lg font-bold">MinhasMilhas</div>
-        {nav.map(({ to, label, icon: I }) => (
-          <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) =>
-            `flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${isActive ? 'bg-accent/10 font-medium text-accent' : 'text-muted hover:bg-line/40'}`}>
+    <NavLink to={to} end={to === '/'} className="relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium">
+      {({ isActive }) => (
+        <motion.span whileTap={{ scale: 0.88 }} className={`relative flex flex-col items-center gap-0.5 ${isActive ? 'text-accent' : 'text-muted'}`}>
+          <span className="relative flex h-8 w-14 items-center justify-center">
+            {isActive && <motion.span layoutId={id} className="absolute inset-0 rounded-full bg-accent/15" transition={{ type: 'spring', stiffness: 500, damping: 36 }} />}
+            <I className="relative h-5 w-5" />
+          </span>
+          {label}
+        </motion.span>
+      )}
+    </NavLink>
+  )
+}
+
+export default function Layout({ pathKey }: { pathKey: string }) {
+  const { pathname } = useLocation()
+  void pathname
+  return (
+    <div className="flex min-h-screen">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-1 border-r border-line/60 p-4 md:flex">
+        <div className="mb-5 flex items-center gap-2 px-2 font-display text-lg font-bold"><img src="/icon.svg" alt="" className="h-8 w-8 rounded-lg" />Minhas Milhas</div>
+        {side.map(({ to, label, icon: I }) => (
+          <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) => `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${isActive ? 'bg-accent/10 font-semibold text-accent' : 'text-muted hover:bg-line/40'}`}>
             <I className="h-4 w-4" />{label}
           </NavLink>
         ))}
-        <Link to="/novo" className="btn btn-primary mt-4"><Plus className="h-4 w-4" />Novo registro</Link>
+        <motion.div whileTap={{ scale: 0.97 }} className="mt-4"><OverlayLink to="/novo" className="btn btn-primary w-full"><Plus className="h-4 w-4" />Novo registro</OverlayLink></motion.div>
       </aside>
-      <main className="min-w-0 flex-1 px-4 pb-28 pt-6 md:px-8 md:pb-10">
-        <div className="mx-auto max-w-4xl"><Outlet /></div>
+
+      <main className="min-w-0 flex-1 px-4 pb-32 md:px-8 md:pb-10">
+        <motion.div key={pathKey} className="mx-auto max-w-4xl" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.24, ease: 'easeOut' }}>
+          <Outlet />
+        </motion.div>
       </main>
-      <Link to="/novo" aria-label="Novo registro" className="fixed right-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg shadow-lg md:hidden"
-        style={{ bottom: 'calc(4.5rem + env(safe-area-inset-bottom, 0px))' }}><Plus /></Link>
-      <nav className="fixed inset-x-0 bottom-0 z-10 flex border-t border-line bg-surface md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-        {nav.map(({ to, label, icon: I }) => (
-          <NavLink key={to} to={to} end={to === '/'} className={({ isActive }) =>
-            `flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${isActive ? 'text-accent' : 'text-muted'}`}>
-            <I className="h-5 w-5" />{label}
-          </NavLink>
-        ))}
+
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line/60 bg-surface/85 backdrop-blur-xl md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="relative mx-auto flex max-w-md items-end">
+          <Tab {...tabs[0]} id="tab" />
+          <Tab {...tabs[1]} id="tab" />
+          <div className="relative flex w-[72px] self-stretch justify-center">
+            <motion.div whileTap={{ scale: 0.9 }} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 400, damping: 18, delay: 0.2 }} className="absolute -top-6">
+              <OverlayLink to="/novo" aria-label="Novo registro" className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg shadow-float ring-4 ring-bg"><Plus className="h-7 w-7" /></OverlayLink>
+            </motion.div>
+          </div>
+          <Tab {...tabs[2]} id="tab" />
+          <Tab {...tabs[3]} id="tab" />
+        </div>
       </nav>
     </div>
   )

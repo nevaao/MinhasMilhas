@@ -14,6 +14,10 @@ export default {
         'accent-fg': 'rgb(var(--accent-fg) / <alpha-value>)',
         danger: 'rgb(var(--danger) / <alpha-value>)',
       },
+      boxShadow: {
+        card: '0 1px 2px rgb(16 40 60 / 0.05), 0 8px 24px -10px rgb(16 40 60 / 0.14)',
+        float: '0 10px 30px -8px rgb(11 122 117 / 0.55)',
+      },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         display: ['"Space Grotesk"', 'Inter', 'system-ui', 'sans-serif'],

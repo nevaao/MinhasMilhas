@@ -1,4 +1,4 @@
-# Plano — MinhasMilhas (app de controle de pontos e milhas)
+# Plano — Minhas Milhas (app de controle de pontos e milhas)
 
 ## Contexto
 Hoje o controle é feito numa planilha (`Controle_de_milhas.xlsx`) com uma aba por programa (Livelo, Smiles, LATAM) e colunas: Descrição, Data, Entrada, Custo, Custo total, Milheiro da operação, Milheiro acumulado, Saída, Custo da saída, Pontos. A lógica é de **custo médio ponderado**:
@@ -6,7 +6,7 @@ Hoje o controle é feito numa planilha (`Controle_de_milhas.xlsx`) com uma aba p
 - Saída: `custo_saida = saida × milheiro_acum_anterior / 1000`; `custo_total -= custo_saida`; `pontos -= saida`
 - `milheiro_acumulado = custo_total / pontos × 1000`; `milheiro_operacao = custo / entrada × 1000`
 
-Objetivo: app pessoal/familiar (estilo "Minhas Finanças") para celular e computador, repo `nevaao/MinhasMilhas` (vazio, só README). Branch: `claude/dazzling-shannon-mryyzo`.
+Objetivo: app pessoal/familiar (estilo "Minhas Finanças") para celular e computador, repo `nevaao/Minhas Milhas` (vazio, só README). Branch: `claude/dazzling-shannon-mryyzo`.
 
 Decisões do usuário: dados isolados por usuário; **PWA (React) + Supabase**; transferência herda custo médio da origem + custos extras, bônus como linha separada.
 

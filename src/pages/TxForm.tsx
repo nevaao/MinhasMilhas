@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import Sheet from '../components/Sheet'
+import { useToast } from '../components/Toast'
 import { useAccounts, useCategories, useCreateTransfer, useDeleteTx, useSaveTx, useTransactions } from '../data/hooks'
 import { computeLedger } from '../lib/ledger'
 import { fmtBRL, fmtPoints, parseNum, today } from '../lib/format'
@@ -10,6 +13,10 @@ type Mode = 'entrada' | 'saida' | 'transferencia'
 export default function TxForm() {
   const { id } = useParams()
   const nav = useNavigate()
+  const loc = useLocation()
+  const toast = useToast()
+  const [search] = useSearchParams()
+  const close = () => ((loc.state as { background?: unknown } | null)?.background ? nav(-1) : nav('/', { replace: true }))
   const { data: accounts = [] } = useAccounts()
   const { data: categories = [] } = useCategories()
   const { data: txs = [] } = useTransactions()
@@ -20,7 +27,8 @@ export default function TxForm() {
   const editing = id ? txs.find((t) => t.id === id) : undefined
   const active = accounts.filter((a) => !a.archived)
 
-  const [mode, setMode] = useState<Mode>('entrada')
+  const tipo = search.get('tipo')
+  const [mode, setMode] = useState<Mode>(tipo === 'saida' || tipo === 'transferencia' ? tipo : 'entrada')
   const [account, setAccount] = useState('')
   const [toAccount, setToAccount] = useState('')
   const [date, setDate] = useState(today())
@@ -102,64 +110,72 @@ export default function TxForm() {
           points: pts, cost: mode === 'saida' ? 0 : +costNum.toFixed(2),
         })
       }
-      nav(-1)
+      toast(editing ? 'Registro atualizado' : mode === 'transferencia' ? 'Transferência registrada' : 'Registro salvo')
+      close()
     } catch (err) { setError((err as Error).message) }
   }
 
   const modes: [Mode, string][] = [['entrada', 'Entrada'], ['saida', 'Saída'], ['transferencia', 'Transferência']]
   const busy = save.isPending || transfer.isPending
 
-  if (id && !editing) return <p className="text-muted">Carregando registro…</p>
+  const title = editing ? 'Editar registro' : 'Novo registro'
+  if (id && !editing) return <Sheet title={title} onClose={close}><p className="py-8 text-center text-muted">Carregando registro…</p></Sheet>
+
+  const footer = (
+    <div className="flex flex-wrap gap-2">
+      <motion.button whileTap={{ scale: 0.97 }} type="submit" form="txform" className="btn btn-primary flex-1" disabled={busy || isTransferEdit}>{busy ? 'Salvando…' : 'Salvar'}</motion.button>
+      {editing && (confirmDel
+        ? <motion.button initial={{ scale: 0.9 }} animate={{ scale: 1 }} type="button" className="btn btn-danger" onClick={async () => { await del.mutateAsync(editing); toast('Registro excluído'); close() }}>Confirmar</motion.button>
+        : <button type="button" className="btn btn-danger" onClick={() => setConfirmDel(true)}>Excluir</button>)}
+    </div>
+  )
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-lg space-y-4">
-      <h1 className="text-2xl font-bold">{editing ? 'Editar registro' : 'Novo registro'}</h1>
-      {!editing && (
-        <div role="tablist" className="grid grid-cols-3 gap-1 rounded-xl bg-line/40 p-1">
-          {modes.map(([m, l]) => (
-            <button type="button" role="tab" aria-selected={mode === m} key={m} onClick={() => setMode(m)}
-              className={`rounded-lg py-2 text-sm font-medium ${mode === m ? 'bg-surface shadow-sm' : 'text-muted'}`}>{l}</button>
-          ))}
-        </div>
-      )}
-      {isTransferEdit && <p className="card p-3 text-sm text-muted">Este registro faz parte de uma transferência. Para corrigir, exclua e crie novamente (a exclusão remove os dois lados).</p>}
-      <fieldset disabled={isTransferEdit} className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div><label className="label" htmlFor="acc">{mode === 'transferencia' ? 'Origem' : 'Conta'}</label>
-            <select id="acc" className="input" value={account} onChange={(e) => setAccount(e.target.value)}>{active.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
-          {mode === 'transferencia'
-            ? <div><label className="label" htmlFor="to">Destino</label>
-                <select id="to" className="input" value={toAccount} onChange={(e) => setToAccount(e.target.value)}>{active.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
-            : <div><label className="label" htmlFor="date">Data</label><input id="date" type="date" className="input" required value={date} onChange={(e) => setDate(e.target.value)} /></div>}
-        </div>
-        {mode === 'transferencia' && <div><label className="label" htmlFor="date">Data</label><input id="date" type="date" className="input" required value={date} onChange={(e) => setDate(e.target.value)} /></div>}
-        <div><label className="label" htmlFor="desc">Descrição</label><input id="desc" className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex.: Clube Smiles, passagem para Bonito" /></div>
-        <div><label className="label" htmlFor="cat">Categoria</label>
-          <select id="cat" className="input" value={category} onChange={(e) => setCategory(e.target.value)}><option value="">Sem categoria</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div><label className="label" htmlFor="pts">{mode === 'saida' ? 'Pontos utilizados' : mode === 'transferencia' ? 'Pontos enviados' : 'Pontos'}</label>
-            <input id="pts" inputMode="numeric" className="input" required value={points} onChange={(e) => setPoints(e.target.value)} /></div>
-          {mode === 'transferencia' && <div><label className="label" htmlFor="pin">Pontos recebidos (se diferente)</label><input id="pin" inputMode="numeric" className="input" value={pointsIn} onChange={(e) => setPointsIn(e.target.value)} placeholder={points || 'igual ao enviado'} /></div>}
-          {mode === 'transferencia' && <div><label className="label" htmlFor="bon">Pontos de bônus</label><input id="bon" inputMode="numeric" className="input" value={bonus} onChange={(e) => setBonus(e.target.value)} placeholder="0" /></div>}
-          {mode !== 'saida' && <div><label className="label" htmlFor="cost">{mode === 'transferencia' ? 'Custo extra (R$)' : 'Custo (R$)'}</label><input id="cost" inputMode="decimal" className="input" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="0,00" /></div>}
-        </div>
-        {mode === 'entrada' && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={bonusType} onChange={(e) => setBonusType(e.target.checked)} />Este registro é um bônus</label>}
-      </fieldset>
+    <Sheet title={title} onClose={close} footer={footer}>
+      <form id="txform" onSubmit={submit} className="space-y-4">
+        {!editing && (
+          <div role="tablist" className="grid grid-cols-3 gap-1 rounded-2xl bg-line/50 p-1">
+            {modes.map(([m, l]) => (
+              <button type="button" role="tab" aria-selected={mode === m} key={m} onClick={() => setMode(m)}
+                className={`relative rounded-xl py-2.5 text-sm font-semibold transition-colors ${mode === m ? 'text-fg' : 'text-muted'}`}>
+                {mode === m && <motion.span layoutId="mode-pill" className="absolute inset-0 rounded-xl bg-surface shadow-sm" transition={{ type: 'spring', stiffness: 500, damping: 36 }} />}
+                <span className="relative">{l}</span>
+              </button>
+            ))}
+          </div>
+        )}
+        {isTransferEdit && <p className="card p-3 text-sm text-muted">Este registro faz parte de uma transferência. Para corrigir, exclua e crie novamente (a exclusão remove os dois lados).</p>}
+        <fieldset disabled={isTransferEdit} className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div><label className="label" htmlFor="acc">{mode === 'transferencia' ? 'Origem' : 'Conta'}</label>
+              <select id="acc" className="input" value={account} onChange={(e) => setAccount(e.target.value)}>{active.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+            {mode === 'transferencia'
+              ? <div><label className="label" htmlFor="to">Destino</label>
+                  <select id="to" className="input" value={toAccount} onChange={(e) => setToAccount(e.target.value)}>{active.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+              : <div><label className="label" htmlFor="date">Data</label><input id="date" type="date" className="input" required value={date} onChange={(e) => setDate(e.target.value)} /></div>}
+          </div>
+          {mode === 'transferencia' && <div><label className="label" htmlFor="date">Data</label><input id="date" type="date" className="input" required value={date} onChange={(e) => setDate(e.target.value)} /></div>}
+          <div><label className="label" htmlFor="desc">Descrição</label><input id="desc" className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex.: Clube Smiles, passagem para Bonito" /></div>
+          <div><label className="label" htmlFor="cat">Categoria</label>
+            <select id="cat" className="input" value={category} onChange={(e) => setCategory(e.target.value)}><option value="">Sem categoria</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div><label className="label" htmlFor="pts">{mode === 'saida' ? 'Pontos utilizados' : mode === 'transferencia' ? 'Pontos enviados' : 'Pontos'}</label>
+              <input id="pts" inputMode="numeric" className="input" required value={points} onChange={(e) => setPoints(e.target.value)} /></div>
+            {mode === 'transferencia' && <div><label className="label" htmlFor="pin">Pontos recebidos (se diferente)</label><input id="pin" inputMode="numeric" className="input" value={pointsIn} onChange={(e) => setPointsIn(e.target.value)} placeholder={points || 'igual ao enviado'} /></div>}
+            {mode === 'transferencia' && <div><label className="label" htmlFor="bon">Pontos de bônus</label><input id="bon" inputMode="numeric" className="input" value={bonus} onChange={(e) => setBonus(e.target.value)} placeholder="0" /></div>}
+            {mode !== 'saida' && <div><label className="label" htmlFor="cost">{mode === 'transferencia' ? 'Custo extra (R$)' : 'Custo (R$)'}</label><input id="cost" inputMode="decimal" className="input" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="0,00" /></div>}
+          </div>
+          {mode === 'entrada' && <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[rgb(var(--accent))]" checked={bonusType} onChange={(e) => setBonusType(e.target.checked)} />Este registro é um bônus</label>}
+        </fieldset>
 
-      {preview && (
-        <div className="card space-y-1 p-4 text-sm">
-          {preview.lines.map(([l, v]) => <div key={l} className="flex justify-between gap-3"><span className="text-muted">{l}</span><span className="num font-medium">{v}</span></div>)}
-          {'warn' in preview && preview.warn && <p className="pt-1 text-danger">{preview.warn}</p>}
-        </div>
-      )}
-      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
-      <div className="flex flex-wrap gap-2">
-        <button className="btn btn-primary" disabled={busy || isTransferEdit}>Salvar</button>
-        <button type="button" className="btn" onClick={() => nav(-1)}>Cancelar</button>
-        {editing && (confirmDel
-          ? <button type="button" className="btn btn-danger ml-auto" onClick={async () => { await del.mutateAsync(editing); nav('/registros') }}>Confirmar exclusão</button>
-          : <button type="button" className="btn btn-danger ml-auto" onClick={() => setConfirmDel(true)}>Excluir</button>)}
-      </div>
-    </form>
+        {preview && (
+          <motion.div layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="card space-y-1.5 p-4 text-sm">
+            {preview.lines.map(([l, v]) => <div key={l} className="flex justify-between gap-3"><span className="text-muted">{l}</span><span className="num font-semibold">{v}</span></div>)}
+            {'warn' in preview && preview.warn && <p className="pt-1 text-danger">{preview.warn}</p>}
+          </motion.div>
+        )}
+        {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+      </form>
+    </Sheet>
   )
 }
