@@ -101,3 +101,21 @@ export function evolution(rowsByAccount: Record<string, LedgerRow[]>): ChartPoin
   }
   return [...byDate.values()]
 }
+
+export interface ExitSimulation {
+  /** Custo da saída (equivale à coluna "Custo da saída/passagem" da planilha). */
+  cost: number
+  pointsAfter: number
+  totalCostAfter: number
+  milheiroAfter: number
+  insufficient: boolean
+}
+
+/** Simula uma saída de `points` sobre o estado atual da conta, sem gravar nada. */
+export function simulateExit(state: AccountState, points: number): ExitSimulation {
+  const cost = (points * state.milheiro) / 1000
+  const insufficient = points > state.points
+  const pointsAfter = Math.max(state.points - points, 0)
+  const totalCostAfter = pointsAfter > 0 ? Math.max(state.totalCost - cost, 0) : 0
+  return { cost, pointsAfter, totalCostAfter, milheiroAfter: milheiro(totalCostAfter, pointsAfter), insufficient }
+}

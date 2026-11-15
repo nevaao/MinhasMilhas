@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { computeLedger, accountState } from './ledger'
+import { computeLedger, accountState, simulateExit } from './ledger'
 import type { Tx, TxType } from './types'
 
 let n = 0
@@ -50,5 +50,22 @@ describe('computeLedger (valores da planilha)', () => {
   it('zera o custo quando o saldo chega a zero', () => {
     const s = accountState(computeLedger([tx('entrada', '2025-01-01', 1000, 30), tx('saida', '2025-01-02', 1000)]))
     expect(s).toEqual({ points: 0, totalCost: 0, milheiro: 0 })
+  })
+})
+
+describe('simulateExit', () => {
+  it('calcula o custo da saída pelo milheiro acumulado, como a planilha', () => {
+    const rows = computeLedger([
+      tx('entrada', '2025-04-15', 1000, 39.9),
+      tx('bonus', '2025-04-15', 13000),
+      tx('bonus', '2025-04-16', 1160),
+      tx('entrada', '2025-05-15', 1000, 39.9),
+    ])
+    const sim = simulateExit(accountState(rows), 12000)
+    expect(sim.cost).toBeCloseTo(59.25742574, 6)
+    expect(sim.pointsAfter).toBe(4160)
+    expect(sim.milheiroAfter).toBeCloseTo(4.938118812, 6)
+    expect(sim.insufficient).toBe(false)
+    expect(simulateExit(accountState(rows), 99999).insufficient).toBe(true)
   })
 })
