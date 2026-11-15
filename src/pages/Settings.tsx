@@ -1,6 +1,4 @@
-import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronRight, Tag } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { supabase } from '../lib/supabase'
 import { useTheme, type ThemePref } from '../lib/theme'
@@ -25,14 +23,8 @@ export default function Settings() {
   const themes: [ThemePref, string][] = [['system', 'Sistema'], ['light', 'Claro'], ['dark', 'Escuro']]
 
   return (
-    <div className="max-w-lg space-y-4">
-      <PageHeader title="Ajustes" subtitle="Tema, categorias, dados e conta." />
-      <FadeUp i={0}>
-        <Link to="/categorias" className="card flex items-center gap-3 p-4 active:bg-line/30">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent"><Tag className="h-5 w-5" /></span>
-          <span className="flex-1 font-medium">Categorias</span><ChevronRight className="h-5 w-5 text-muted" />
-        </Link>
-      </FadeUp>
+    <div className="mx-auto max-w-lg space-y-4">
+      <PageHeader title="Ajustes" subtitle="Tema, dados e conta." />
       <FadeUp i={1} className="card space-y-3 p-4">
         <h2 className="font-semibold">Tema</h2>
         <div className="grid grid-cols-3 gap-1 rounded-2xl bg-line/50 p-1">
