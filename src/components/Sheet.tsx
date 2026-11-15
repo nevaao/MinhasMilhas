@@ -7,7 +7,7 @@ export default function Sheet({ title, onClose, children, footer }: { title: str
   const controls = useDragControls()
   const desktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
   useEffect(() => {
-    const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const k = (e: KeyboardEvent) => e.key === 'Escape' && !e.defaultPrevented && onClose()
     window.addEventListener('keydown', k)
     return () => window.removeEventListener('keydown', k)
   }, [onClose])

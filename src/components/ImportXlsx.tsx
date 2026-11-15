@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { FileSpreadsheet, Upload } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { useAccounts, useCategories, useTransactions } from '../data/hooks'
@@ -15,6 +16,7 @@ export default function ImportXlsx() {
   const [sheets, setSheets] = useState<ImportedSheet[] | null>(null)
   const [force, setForce] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [fileName, setFileName] = useState('')
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
 
   const matchAccount = (sheet: string) => {
@@ -28,7 +30,7 @@ export default function ImportXlsx() {
   const conflict = !!sheets?.some((s) => hasData(s.sheet))
 
   async function pick(file?: File) {
-    setMsg(null); setSheets(null); setForce(false)
+    setMsg(null); setSheets(null); setForce(false); setFileName(file?.name ?? '')
     if (!file) return
     try {
       const parsed = await parseWorkbook(file)
@@ -85,7 +87,11 @@ export default function ImportXlsx() {
     <section className="card space-y-3 p-4">
       <h2 className="font-semibold">Importar planilha</h2>
       <p className="text-sm text-muted">Envie seu .xlsx de controle. Cada aba vira uma conta, com todo o histórico. O milheiro é recalculado pelo app.</p>
-      <input type="file" accept=".xlsx" aria-label="Arquivo da planilha" className="block w-full text-sm" onChange={(e) => pick(e.target.files?.[0])} />
+      <label className="btn cursor-pointer focus-within:ring-2 focus-within:ring-accent/40">
+        <Upload className="h-4 w-4" />Escolher arquivo
+        <input type="file" accept=".xlsx" aria-label="Arquivo da planilha" className="sr-only" onChange={(e) => pick(e.target.files?.[0])} />
+      </label>
+      {fileName && <p className="flex items-center gap-2 text-sm text-muted"><FileSpreadsheet className="h-4 w-4 shrink-0 text-accent" /><span className="truncate">{fileName}</span></p>}
       {sheets && (
         <div className="space-y-3">
           <div className="overflow-x-auto">

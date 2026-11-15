@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Sheet from '../components/Sheet'
+import Select from '../components/Select'
 import { useToast } from '../components/Toast'
 import { useAccounts, useCategories, useCreateTransfer, useDeleteTx, useSaveTx, useTransactions } from '../data/hooks'
 import { computeLedger } from '../lib/ledger'
@@ -148,16 +149,16 @@ export default function TxForm() {
         <fieldset disabled={isTransferEdit} className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div><label className="label" htmlFor="acc">{mode === 'transferencia' ? 'Origem' : 'Conta'}</label>
-              <select id="acc" className="input" value={account} onChange={(e) => setAccount(e.target.value)}>{active.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+              <Select id="acc" value={account} onChange={setAccount} options={active.map((a) => ({ value: a.id, label: a.name, color: a.color }))} /></div>
             {mode === 'transferencia'
               ? <div><label className="label" htmlFor="to">Destino</label>
-                  <select id="to" className="input" value={toAccount} onChange={(e) => setToAccount(e.target.value)}>{active.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+                  <Select id="to" value={toAccount} onChange={setToAccount} options={active.map((a) => ({ value: a.id, label: a.name, color: a.color }))} /></div>
               : <div><label className="label" htmlFor="date">Data</label><input id="date" type="date" className="input" required value={date} onChange={(e) => setDate(e.target.value)} /></div>}
           </div>
           {mode === 'transferencia' && <div><label className="label" htmlFor="date">Data</label><input id="date" type="date" className="input" required value={date} onChange={(e) => setDate(e.target.value)} /></div>}
           <div><label className="label" htmlFor="desc">Descrição</label><input id="desc" className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex.: Clube Smiles, passagem para Bonito" /></div>
           <div><label className="label" htmlFor="cat">Categoria</label>
-            <select id="cat" className="input" value={category} onChange={(e) => setCategory(e.target.value)}><option value="">Sem categoria</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+            <Select id="cat" value={category} onChange={setCategory} options={[{ value: '', label: 'Sem categoria' }, ...categories.map((c) => ({ value: c.id, label: c.name, color: c.color }))]} /></div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div><label className="label" htmlFor="pts">{mode === 'saida' ? 'Pontos utilizados' : mode === 'transferencia' ? 'Pontos enviados' : 'Pontos'}</label>
               <input id="pts" inputMode="numeric" className="input" required value={points} onChange={(e) => setPoints(e.target.value)} /></div>
