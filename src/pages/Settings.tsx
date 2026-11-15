@@ -1,6 +1,7 @@
 import { useAuth } from '../auth/AuthProvider'
 import { supabase } from '../lib/supabase'
 import { useTheme, type ThemePref } from '../lib/theme'
+import ImportXlsx from '../components/ImportXlsx'
 import { useAccounts, useCategories, useTransactions } from '../data/hooks'
 
 export default function Settings() {
@@ -27,6 +28,7 @@ export default function Settings() {
           {themes.map(([k, l]) => <button key={k} onClick={() => setPref(k)} className={`rounded-lg py-2 text-sm font-medium ${pref === k ? 'bg-surface shadow-sm' : 'text-muted'}`}>{l}</button>)}
         </div>
       </section>
+      <ImportXlsx />
       <section className="card space-y-3 p-4">
         <h2 className="font-semibold">Seus dados</h2>
         <p className="text-sm text-muted">Baixe uma cópia de contas, categorias e registros.</p>
