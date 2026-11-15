@@ -20,13 +20,12 @@ function Tab({ to, label, icon: I, id, also = [] }: { to: string; label: string;
       {({ isActive: a }) => {
         const isActive = a || also.includes(pathname)
         return (
-          <motion.span whileTap={{ scale: 0.88 }} className={`relative flex flex-col items-center gap-0.5 ${isActive ? 'text-accent' : 'text-muted'}`}>
-            <span className="relative flex h-8 w-14 items-center justify-center">
-              {isActive && <motion.span layoutId={id} className="absolute inset-0 rounded-full bg-accent/15" transition={{ type: 'spring', stiffness: 500, damping: 36 }} />}
-              <I className="relative h-5 w-5" />
+          <span data-tab={id} className={`flex flex-col items-center gap-0.5 transition-colors duration-150 active:scale-90 ${isActive ? 'text-accent' : 'text-muted'}`}>
+            <span className={`flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-150 ${isActive ? 'bg-accent/15' : 'bg-transparent'}`}>
+              <I className="h-5 w-5" />
             </span>
             {label}
-          </motion.span>
+          </span>
         )
       }}
     </NavLink>
@@ -47,12 +46,12 @@ export default function Layout({ pathKey }: { pathKey: string }) {
       </aside>
 
       <main className="min-w-0 flex-1 px-4 pb-32 md:px-8 md:pb-10">
-        <motion.div key={pathKey} className="mx-auto max-w-4xl" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.24, ease: 'easeOut' }}>
+        <motion.div key={pathKey} className="mx-auto max-w-4xl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}>
           <Outlet />
         </motion.div>
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line/60 bg-surface/85 backdrop-blur-xl md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line/60 bg-surface md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <div className="relative mx-auto flex max-w-md items-end">
           <Tab {...nav.resumo} id="tab" />
           <Tab {...nav.registros} id="tab" />

@@ -14,7 +14,7 @@ export default function PageHeader({ title, subtitle, action, back }: { title: s
   }, [])
   return (
     <>
-      <div className={`sticky top-0 z-20 -mx-4 bg-bg/80 px-4 backdrop-blur-xl transition-[border-color] md:-mx-8 md:px-8 border-b ${scrolled ? 'border-line' : 'border-transparent'}`} style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <div className={`sticky top-0 z-20 -mx-4 bg-bg/95 px-4 transition-[border-color] md:-mx-8 md:px-8 border-b ${scrolled ? 'border-line' : 'border-transparent'}`} style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
         <div className="flex h-12 items-center gap-2 md:h-14">
           {back && <Link to={back} replace aria-label="Voltar" className="-ml-2 flex h-9 w-9 items-center justify-center rounded-full text-accent active:bg-line/50 md:hidden"><ChevronLeft className="h-6 w-6" /></Link>}
           <motion.span animate={{ opacity: scrolled ? 1 : 0, y: scrolled ? 0 : 6 }} className="font-display text-base font-bold">{title}</motion.span>

@@ -39,7 +39,6 @@ export default function TxForm() {
   const [pointsIn, setPointsIn] = useState('')
   const [bonus, setBonus] = useState('')
   const [cost, setCost] = useState('')
-  const [bonusType, setBonusType] = useState(false)
   const [error, setError] = useState('')
   const [confirmDel, setConfirmDel] = useState(false)
 
@@ -48,7 +47,7 @@ export default function TxForm() {
     setMode(editing.type === 'saida' ? 'saida' : 'entrada')
     setAccount(editing.account_id); setDate(editing.date); setDescription(editing.description)
     setCategory(editing.category_id ?? ''); setPoints(String(editing.points))
-    setCost(editing.cost ? String(editing.cost).replace('.', ',') : ''); setBonusType(editing.type === 'bonus')
+    setCost(editing.cost ? String(editing.cost).replace('.', ',') : '')
   }, [editing])
   useEffect(() => { if (!account && active[0]) setAccount(active[0].id) }, [active, account])
   useEffect(() => { if (!toAccount && active[1]) setToAccount(active[1].id) }, [active, toAccount])
@@ -69,7 +68,7 @@ export default function TxForm() {
   const preview = useMemo(() => {
     if (!account || pts <= 0) return null
     if (mode === 'entrada') {
-      const r = ledgerFor(account, hypo(account, bonusType ? 'bonus' : 'entrada', pts, costNum)).at(-1)!
+      const r = ledgerFor(account, hypo(account, editing?.type === 'bonus' ? 'bonus' : 'entrada', pts, costNum)).at(-1)!
       return { lines: [['Milheiro da operação', fmtBRL(r.milheiroOp)], ['Novo saldo', `${fmtPoints(r.pointsAfter)} pts`], ['Novo milheiro acumulado', fmtBRL(r.milheiroAfter)]] }
     }
     if (mode === 'saida') {
@@ -90,7 +89,7 @@ export default function TxForm() {
       lines: [['Custo herdado da origem', fmtBRL(out.costOut)], ['Custo total no destino', fmtBRL(costIn)], ['Novo saldo no destino', `${fmtPoints(dest2.pointsAfter)} pts`], ['Novo milheiro no destino', fmtBRL(dest2.milheiroAfter)]],
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, account, toAccount, date, pts, pointsIn, bonus, costNum, bonusType, txs, editing])
+  }, [mode, account, toAccount, date, pts, pointsIn, bonus, costNum, txs, editing])
 
   async function submit(e: FormEvent) {
     e.preventDefault(); setError('')
@@ -105,7 +104,7 @@ export default function TxForm() {
           p_cost_in: +(out.costOut + costNum).toFixed(2), p_bonus: Math.round(parseNum(bonus)),
         })
       } else {
-        const type: TxType = mode === 'saida' ? 'saida' : bonusType ? 'bonus' : 'entrada'
+        const type: TxType = mode === 'saida' ? 'saida' : editing?.type === 'bonus' ? 'bonus' : 'entrada'
         await save.mutateAsync({
           ...(editing ? { id: editing.id } : {}), account_id: account, category_id: category || null, type, date, description,
           points: pts, cost: mode === 'saida' ? 0 : +costNum.toFixed(2),
@@ -166,7 +165,6 @@ export default function TxForm() {
             {mode === 'transferencia' && <div><label className="label" htmlFor="bon">Pontos de bônus</label><input id="bon" inputMode="numeric" className="input" value={bonus} onChange={(e) => setBonus(e.target.value)} placeholder="0" /></div>}
             {mode !== 'saida' && <div><label className="label" htmlFor="cost">{mode === 'transferencia' ? 'Custo extra (R$)' : 'Custo (R$)'}</label><input id="cost" inputMode="decimal" className="input" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="0,00" /></div>}
           </div>
-          {mode === 'entrada' && <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[rgb(var(--accent))]" checked={bonusType} onChange={(e) => setBonusType(e.target.checked)} />Este registro é um bônus</label>}
         </fieldset>
 
         {preview && (

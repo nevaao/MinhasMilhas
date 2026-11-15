@@ -14,6 +14,8 @@ export default {
         'accent-fg': 'rgb(var(--accent-fg) / <alpha-value>)',
         danger: 'rgb(var(--danger) / <alpha-value>)',
       },
+      keyframes: { rise: { from: { opacity: '0', transform: 'translateY(8px)' }, to: { opacity: '1', transform: 'none' } } },
+      animation: { rise: 'rise 0.22s ease-out both' },
       boxShadow: {
         card: '0 1px 2px rgb(16 40 60 / 0.05), 0 8px 24px -10px rgb(16 40 60 / 0.14)',
         float: '0 10px 30px -8px rgb(11 122 117 / 0.55)',

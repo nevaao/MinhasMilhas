@@ -1,9 +1,8 @@
-import { motion } from 'framer-motion'
 import type { Account, Category, Tx } from '../lib/types'
 import { isOut } from '../lib/ledger'
 import { fmtBRL, fmtDate, fmtPoints } from '../lib/format'
 import { Badge } from './Icon'
-import { enter, OverlayLink } from './motion'
+import { OverlayLink } from './motion'
 
 export default function TxRow({ tx, accounts, categories, costOut, index = 0 }: { tx: Tx; accounts: Account[]; categories: Category[]; costOut?: number; index?: number }) {
   const acc = accounts.find((a) => a.id === tx.account_id)
@@ -11,7 +10,7 @@ export default function TxRow({ tx, accounts, categories, costOut, index = 0 }: 
   const out = isOut(tx)
   const money = out ? costOut ?? 0 : tx.cost
   return (
-    <motion.div {...enter(index)} whileTap={{ scale: 0.985 }}>
+    <div className="animate-rise transition-transform active:scale-[0.985]" style={{ animationDelay: `${Math.min(index, 6) * 25}ms` }}>
       <OverlayLink to={`/registros/${tx.id}`} className="flex items-center gap-3 px-3.5 py-3 active:bg-line/30">
         <Badge color={cat?.color ?? '#64748b'} icon={cat?.icon ?? 'tag'} size={42} />
         <div className="min-w-0 flex-1">
@@ -23,6 +22,6 @@ export default function TxRow({ tx, accounts, categories, costOut, index = 0 }: 
           <div className="text-xs text-muted">{money > 0 ? fmtBRL(money) : '—'}</div>
         </div>
       </OverlayLink>
-    </motion.div>
+    </div>
   )
 }
