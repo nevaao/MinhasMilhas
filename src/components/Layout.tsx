@@ -12,9 +12,12 @@ const tabs = [
 const side = [...tabs.slice(0, 3), { to: '/categorias', label: 'Categorias', icon: Tag }, tabs[3]]
 
 function Tab({ to, label, icon: I, id }: { to: string; label: string; icon: typeof List; id: string }) {
+  const { pathname } = useLocation()
   return (
     <NavLink to={to} end={to === '/'} className="relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium">
-      {({ isActive }) => (
+      {({ isActive: a }) => {
+        const isActive = a || (to === '/contas' && pathname === '/categorias')
+        return (
         <motion.span whileTap={{ scale: 0.88 }} className={`relative flex flex-col items-center gap-0.5 ${isActive ? 'text-accent' : 'text-muted'}`}>
           <span className="relative flex h-8 w-14 items-center justify-center">
             {isActive && <motion.span layoutId={id} className="absolute inset-0 rounded-full bg-accent/15" transition={{ type: 'spring', stiffness: 500, damping: 36 }} />}
@@ -22,14 +25,13 @@ function Tab({ to, label, icon: I, id }: { to: string; label: string; icon: type
           </span>
           {label}
         </motion.span>
-      )}
+        )
+      }}
     </NavLink>
   )
 }
 
 export default function Layout({ pathKey }: { pathKey: string }) {
-  const { pathname } = useLocation()
-  void pathname
   return (
     <div className="flex min-h-screen">
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-1 border-r border-line/60 p-4 md:flex">

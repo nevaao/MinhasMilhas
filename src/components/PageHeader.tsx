@@ -13,7 +13,7 @@ export default function PageHeader({ title, subtitle, action }: { title: string;
   return (
     <>
       <div className={`sticky top-0 z-20 -mx-4 bg-bg/80 px-4 backdrop-blur-xl transition-[border-color] md:-mx-8 md:px-8 border-b ${scrolled ? 'border-line' : 'border-transparent'}`} style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-        <div className="flex h-12 items-center justify-between gap-3">
+        <div className="flex h-14 items-center justify-between gap-3 md:h-[68px]">
           <motion.span animate={{ opacity: scrolled ? 1 : 0, y: scrolled ? 0 : 6 }} className="font-display text-base font-bold">{title}</motion.span>
           <div className="ml-auto">{action}</div>
         </div>
