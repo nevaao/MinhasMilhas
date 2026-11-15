@@ -1,8 +1,13 @@
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { ChevronRight, Tag } from 'lucide-react'
 import { useAuth } from '../auth/AuthProvider'
 import { supabase } from '../lib/supabase'
 import { useTheme, type ThemePref } from '../lib/theme'
-import ImportXlsx from '../components/ImportXlsx'
 import { useAccounts, useCategories, useTransactions } from '../data/hooks'
+import ImportXlsx from '../components/ImportXlsx'
+import PageHeader from '../components/PageHeader'
+import { FadeUp } from '../components/motion'
 
 export default function Settings() {
   const { session } = useAuth()
@@ -20,25 +25,36 @@ export default function Settings() {
   const themes: [ThemePref, string][] = [['system', 'Sistema'], ['light', 'Claro'], ['dark', 'Escuro']]
 
   return (
-    <div className="max-w-lg space-y-6">
-      <h1 className="text-2xl font-bold">Ajustes</h1>
-      <section className="card space-y-3 p-4">
+    <div className="max-w-lg space-y-4">
+      <PageHeader title="Ajustes" subtitle="Tema, categorias, dados e conta." />
+      <FadeUp i={0}>
+        <Link to="/categorias" className="card flex items-center gap-3 p-4 active:bg-line/30">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/15 text-accent"><Tag className="h-5 w-5" /></span>
+          <span className="flex-1 font-medium">Categorias</span><ChevronRight className="h-5 w-5 text-muted" />
+        </Link>
+      </FadeUp>
+      <FadeUp i={1} className="card space-y-3 p-4">
         <h2 className="font-semibold">Tema</h2>
-        <div className="grid grid-cols-3 gap-1 rounded-xl bg-line/40 p-1">
-          {themes.map(([k, l]) => <button key={k} onClick={() => setPref(k)} className={`rounded-lg py-2 text-sm font-medium ${pref === k ? 'bg-surface shadow-sm' : 'text-muted'}`}>{l}</button>)}
+        <div className="grid grid-cols-3 gap-1 rounded-2xl bg-line/50 p-1">
+          {themes.map(([k, l]) => (
+            <button key={k} onClick={() => setPref(k)} className={`relative rounded-xl py-2.5 text-sm font-semibold ${pref === k ? 'text-fg' : 'text-muted'}`}>
+              {pref === k && <motion.span layoutId="theme-pill" className="absolute inset-0 rounded-xl bg-surface shadow-sm" transition={{ type: 'spring', stiffness: 500, damping: 36 }} />}
+              <span className="relative">{l}</span>
+            </button>
+          ))}
         </div>
-      </section>
-      <ImportXlsx />
-      <section className="card space-y-3 p-4">
+      </FadeUp>
+      <FadeUp i={2}><ImportXlsx /></FadeUp>
+      <FadeUp i={3} className="card space-y-3 p-4">
         <h2 className="font-semibold">Seus dados</h2>
         <p className="text-sm text-muted">Baixe uma cópia de contas, categorias e registros.</p>
         <button className="btn" onClick={exportJson}>Exportar JSON</button>
-      </section>
-      <section className="card space-y-3 p-4">
+      </FadeUp>
+      <FadeUp i={4} className="card space-y-3 p-4">
         <h2 className="font-semibold">Conta</h2>
         <p className="break-all text-sm text-muted">{session?.user.email}</p>
         <button className="btn" onClick={() => supabase.auth.signOut()}>Sair</button>
-      </section>
+      </FadeUp>
     </div>
   )
 }

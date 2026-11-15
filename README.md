@@ -1,4 +1,4 @@
-# MinhasMilhas
+# Minhas Milhas
 
 Aplicativo pessoal (PWA) para controlar pontos e milhas de programas como Livelo, Smiles e LATAM Pass e calcular o valor do milheiro de cada conta. Plano completo em [`docs/PLANO.md`](docs/PLANO.md).
 

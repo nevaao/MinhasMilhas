@@ -18,7 +18,7 @@ export function Icon({ name, className }: { name: string; className?: string }) 
 
 export function Badge({ color, icon, size = 32 }: { color: string; icon: string; size?: number }) {
   return (
-    <span className="inline-flex shrink-0 items-center justify-center rounded-lg" style={{ width: size, height: size, background: color + '26', color }}>
+    <span className="inline-flex shrink-0 items-center justify-center rounded-xl" style={{ width: size, height: size, background: color + '26', color }}>
       <Icon name={icon} className="h-[55%] w-[55%]" />
     </span>
   )

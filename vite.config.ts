@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: 'MinhasMilhas',
-        short_name: 'MinhasMilhas',
+        name: 'Minhas Milhas',
+        short_name: 'Minhas Milhas',
         description: 'Controle de pontos e milhas e do valor do milheiro',
         lang: 'pt-BR',
         theme_color: '#0b7a75',
