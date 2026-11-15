@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 246 248 250; --surface: 255 255 255; --fg: 20 32 43; --muted: 91 107 122;
+  --line: 219 227 234; --accent: 11 122 117; --accent-fg: 255 255 255; --danger: 200 40 40;
+}
+.dark {
+  --bg: 14 22 29; --surface: 22 33 43; --fg: 230 237 243; --muted: 147 164 179;
+  --line: 38 53 68; --accent: 63 195 185; --accent-fg: 8 20 24; --danger: 240 110 110;
+  color-scheme: dark;
+}
+html, body, #root { height: 100%; }
+body { @apply bg-bg text-fg font-sans antialiased; padding-top: env(safe-area-inset-top, 0px); }
+h1, h2, h3 { @apply font-display; }
+.num { font-variant-numeric: tabular-nums; }
+
+@layer components {
+  .card { @apply bg-surface border border-line rounded-xl; }
+  .input { @apply w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent; }
+  .label { @apply block text-xs font-medium text-muted mb-1; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium border border-line bg-surface hover:bg-line/40 disabled:opacity-50 transition-colors; }
+  .btn-primary { @apply bg-accent text-accent-fg border-accent hover:opacity-90 hover:bg-accent; }
+  .btn-danger { @apply text-danger; }
+}
