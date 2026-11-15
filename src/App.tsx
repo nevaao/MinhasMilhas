@@ -12,6 +12,7 @@ import TxForm from './pages/TxForm'
 import Accounts from './pages/Accounts'
 import Categories from './pages/Categories'
 import Settings from './pages/Settings'
+import Simulation from './pages/Simulation'
 
 const Splash = ({ text }: { text: string }) => (
   <div className="flex min-h-screen flex-col items-center justify-center gap-4 text-muted">
@@ -46,6 +47,7 @@ export default function App() {
         <Route element={<Layout pathKey={base.pathname} />}>
           <Route index element={<Dashboard />} />
           <Route path="registros" element={<Transactions />} />
+          <Route path="simulacao" element={<Simulation />} />
           <Route path="contas" element={<Accounts />} />
           <Route path="categorias" element={<Categories />} />
           <Route path="config" element={<Settings />} />

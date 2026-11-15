@@ -14,6 +14,7 @@ export default function CrudList<T extends Item>(props: {
   onSave: (v: { id?: string; name: string; color: string; icon: string; archived?: boolean }) => Promise<unknown>
   onDelete: (id: string) => Promise<unknown>
   archivable?: boolean
+  logos?: boolean
 }) {
   const [edit, setEdit] = useState<Partial<Item> | null>(null)
   const [confirm, setConfirm] = useState('')
@@ -60,7 +61,7 @@ export default function CrudList<T extends Item>(props: {
             footer={<button type="submit" form="crud" className="btn btn-primary w-full">Salvar</button>}>
             <form id="crud" onSubmit={submit} className="space-y-4">
               <div><label className="label" htmlFor="nm">Nome</label><input id="nm" className="input" autoFocus required value={edit.name ?? ''} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></div>
-              <ColorIconPicker color={edit.color!} icon={edit.icon!} onColor={(color) => setEdit({ ...edit, color })} onIcon={(icon) => setEdit({ ...edit, icon })} />
+              <ColorIconPicker logos={props.logos} color={edit.color!} icon={edit.icon!} onColor={(color) => setEdit({ ...edit, color })} onIcon={(icon) => setEdit({ ...edit, icon })} />
               {props.archivable && <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4" checked={!!edit.archived} onChange={(e) => setEdit({ ...edit, archived: e.target.checked })} />Arquivada (some do resumo e dos formulários)</label>}
               {error && <p role="alert" className="text-sm text-danger">{error}</p>}
             </form>
