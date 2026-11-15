@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CalendarDays, Search, X } from 'lucide-react'
 import { useAccounts, useCategories, useLedgers, useTransactions } from '../data/hooks'
 import { fmtDate, fmtMonth, normText } from '../lib/format'
@@ -19,14 +19,17 @@ export default function Transactions() {
   const [date, setDate] = useState('')
   const [q, setQ] = useState('')
 
+  const [limit, setLimit] = useState(30)
+  useEffect(() => setLimit(30), [acc, cat, type, date, q])
   const query = normText(q)
   const catName = (id: string | null) => categories.find((c) => c.id === id)?.name ?? ''
   const list = txs
     .filter((t) => (!acc || t.account_id === acc) && (!cat || t.category_id === cat) && (!type || t.type === type) && (!date || t.date === date))
     .filter((t) => !query || normText(t.description || catName(t.category_id)).includes(query))
     .sort((a, b) => b.date.localeCompare(a.date) || b.created_at.localeCompare(a.created_at))
+  const visible = list.slice(0, limit)
   const groups = new Map<string, typeof list>()
-  for (const t of list) { const k = t.date.slice(0, 7); groups.set(k, [...(groups.get(k) ?? []), t]) }
+  for (const t of visible) { const k = t.date.slice(0, 7); groups.set(k, [...(groups.get(k) ?? []), t]) }
 
   return (
     <div className="space-y-4">
@@ -52,6 +55,7 @@ export default function Transactions() {
           <div className="card divide-y divide-line/60 overflow-hidden">{items.map((t, i) => <TxRow key={t.id} index={i} tx={t} accounts={accounts} categories={categories} costOut={costOut[t.id]} />)}</div>
         </section>
       ))}
+      {list.length > limit && <button className="btn w-full" onClick={() => setLimit((n) => n + 30)}>Mostrar mais ({list.length - limit} restantes)</button>}
       {isLoading && <ListSkeleton />}
       {!isLoading && list.length === 0 && <p className="py-10 text-center text-sm text-muted">Nenhum registro encontrado.</p>}
     </div>

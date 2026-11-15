@@ -11,7 +11,7 @@ import TxRow from '../components/TxRow'
 import PageHeader from '../components/PageHeader'
 import Select from '../components/Select'
 import AnimatedNumber from '../components/AnimatedNumber'
-import { FadeUp, OverlayLink } from '../components/motion'
+import { Defer, FadeUp, OverlayLink } from '../components/motion'
 import { ListSkeleton, Skeleton } from '../components/Skeleton'
 
 const quick = [
@@ -53,7 +53,7 @@ export default function Dashboard() {
     <div>
       <PageHeader title="Resumo" subtitle="Seus pontos e o custo médio por milheiro." />
 
-      <motion.section className="hero relative overflow-hidden rounded-3xl p-5 shadow-float" initial={{ opacity: 0, y: 16, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 24 }}>
+      <motion.section className="hero relative overflow-hidden rounded-3xl p-5 shadow-float" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.22, ease: 'easeOut' }}>
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10" />
         <div className="pointer-events-none absolute -bottom-12 right-10 h-32 w-32 rounded-full bg-white/10" />
         <div className="relative">
@@ -96,7 +96,7 @@ export default function Dashboard() {
 
       <FadeUp i={3} className="card mt-6 p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-semibold">Pontos × milheiro</h2>
+          <h2 className="font-semibold">Pontos X Milheiro</h2>
           <div className="flex flex-wrap items-center gap-2">
             <Select variant="chip" ariaLabel="Período do gráfico" value={period} onChange={(v) => setPeriod(v as PeriodKey)} options={[
               { value: 'week', label: 'Última semana' }, { value: 'month', label: 'Último mês' }, { value: 'quarter', label: 'Último trimestre' },
@@ -107,6 +107,7 @@ export default function Dashboard() {
         </div>
         {chart.length < 2 ? <p className="py-10 text-center text-sm text-muted">Sem dados para este período.</p> : (
           <div className="h-64">
+            <Defer>
             <ResponsiveContainer>
               <ComposedChart data={chart} margin={{ left: 0, right: 0, top: 8 }}>
                 <CartesianGrid stroke="rgb(var(--line))" vertical={false} />
@@ -115,10 +116,11 @@ export default function Dashboard() {
                 <YAxis yAxisId="m" orientation="right" tick={{ fontSize: 11, fill: 'rgb(var(--muted))' }} stroke="rgb(var(--line))" width={40} />
                 <Tooltip labelFormatter={(_, p) => (p?.[0]?.payload?.date ? fmtDate(p[0].payload.date) : '')} contentStyle={{ background: 'rgb(var(--surface))', border: '1px solid rgb(var(--line))', borderRadius: 12, fontSize: 12 }}
                   formatter={(v, n) => (n === 'Pontos' ? [fmtPoints(Number(v)), 'Pontos'] : [fmtBRL(Number(v)), 'Milheiro'])} />
-                <Bar yAxisId="p" dataKey="pontos" name="Pontos" fill="rgb(var(--muted) / 0.35)" radius={[4, 4, 0, 0]} animationDuration={900} />
-                <Line yAxisId="m" dataKey="milheiro" name="Milheiro" stroke="rgb(var(--accent))" strokeWidth={3} dot={false} type="monotone" animationDuration={1200} />
+                <Bar yAxisId="p" dataKey="pontos" name="Pontos" fill="rgb(var(--muted) / 0.35)" radius={[4, 4, 0, 0]} animationDuration={450} />
+                <Line yAxisId="m" dataKey="milheiro" name="Milheiro" stroke="rgb(var(--accent))" strokeWidth={3} dot={false} type="monotone" animationDuration={600} />
               </ComposedChart>
             </ResponsiveContainer>
+            </Defer>
           </div>
         )}
       </FadeUp>
