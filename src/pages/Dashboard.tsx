@@ -9,6 +9,7 @@ import { fmtBRL, fmtDate, fmtPoints } from '../lib/format'
 import { Badge } from '../components/Icon'
 import TxRow from '../components/TxRow'
 import PageHeader from '../components/PageHeader'
+import Select from '../components/Select'
 import AnimatedNumber from '../components/AnimatedNumber'
 import { FadeUp, OverlayLink } from '../components/motion'
 import { ListSkeleton, Skeleton } from '../components/Skeleton'
@@ -89,10 +90,7 @@ export default function Dashboard() {
       <FadeUp i={3} className="card mt-6 p-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-semibold">Pontos × milheiro</h2>
-          <select aria-label="Conta do gráfico" className="input !w-auto !py-2 !text-sm" value={sel} onChange={(e) => setSel(e.target.value)}>
-            <option value="all">Todas as contas</option>
-            {active.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-          </select>
+          <Select variant="chip" ariaLabel="Conta do gráfico" value={sel} onChange={setSel} options={[{ value: 'all', label: 'Todas as contas' }, ...active.map((a) => ({ value: a.id, label: a.name, color: a.color }))]} />
         </div>
         {chart.length < 2 ? <p className="py-10 text-center text-sm text-muted">O gráfico aparece quando houver registros em pelo menos duas datas.</p> : (
           <div className="h-64">

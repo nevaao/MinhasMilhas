@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { NavLink } from 'react-router-dom'
 import { Plus } from 'lucide-react'
 import { Badge, ColorIconPicker } from './Icon'
 import PageHeader from './PageHeader'
@@ -35,17 +34,6 @@ export default function CrudList<T extends Item>(props: {
     <div>
       <PageHeader title={props.title} subtitle={props.subtitle}
         action={<motion.button whileTap={{ scale: 0.94 }} className="btn btn-primary !min-h-[38px] !px-3.5 !py-1.5" onClick={() => setEdit({ name: '', color: '#0b7a75', icon: props.defaultIcon })}><Plus className="h-4 w-4" />Adicionar</motion.button>} />
-
-      <div className="mb-4 grid grid-cols-2 gap-1 rounded-2xl bg-line/50 p-1">
-        {[['/contas', 'Contas'], ['/categorias', 'Categorias']].map(([to, label]) => (
-          <NavLink key={to} to={to} replace className={({ isActive }) => `relative rounded-xl py-2.5 text-center text-sm font-semibold ${isActive ? 'text-fg' : 'text-muted'}`}>
-            {({ isActive }) => (<>
-              {isActive && <motion.span layoutId="crud-pill" className="absolute inset-0 rounded-xl bg-surface shadow-sm" transition={{ type: 'spring', stiffness: 500, damping: 36 }} />}
-              <span className="relative">{label}</span>
-            </>)}
-          </NavLink>
-        ))}
-      </div>
 
       <div className="card divide-y divide-line/60 overflow-hidden">
         <AnimatePresence initial={false}>
