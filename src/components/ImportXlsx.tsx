@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAccounts, useCategories, useTransactions } from '../data/hooks'
 import { parseWorkbook, type ImportedSheet } from '../lib/importXlsx'
 import { fmtBRL, fmtPoints } from '../lib/format'
+import { BRAND_PREFIX, brandForName } from '../lib/brands'
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
 
@@ -52,7 +53,8 @@ export default function ImportXlsx() {
       for (const s of sheets) {
         let acc = matchAccount(s.sheet)
         if (!acc) {
-          const { data, error } = await supabase.from('accounts').insert({ name: s.sheet, color: '#64748b', icon: 'plane' }).select().single()
+          const brand = brandForName(s.sheet)
+          const { data, error } = await supabase.from('accounts').insert({ name: s.sheet, color: brand?.bg ?? '#64748b', icon: brand ? BRAND_PREFIX + brand.id : 'plane' }).select().single()
           if (error) throw new Error(error.message)
           acc = data
         }
