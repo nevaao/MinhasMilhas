@@ -60,9 +60,9 @@ export default function CrudList<T extends Item>(props: {
           <Sheet title={edit.id ? `Editar ${props.noun}` : `Nova ${props.noun}`} onClose={() => setEdit(null)}
             footer={<button type="submit" form="crud" className="btn btn-primary w-full">Salvar</button>}>
             <form id="crud" onSubmit={submit} className="space-y-4">
-              <div><label className="label" htmlFor="nm">Nome</label><input id="nm" className="input" autoFocus required value={edit.name ?? ''} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></div>
-              <ColorIconPicker logos={props.logos} color={edit.color!} icon={edit.icon!} onColor={(color) => setEdit({ ...edit, color })} onIcon={(icon) => setEdit({ ...edit, icon })} />
-              {props.archivable && <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4" checked={!!edit.archived} onChange={(e) => setEdit({ ...edit, archived: e.target.checked })} />Arquivada (some do resumo e dos formulários)</label>}
+              <div><label className="label" htmlFor="nm">Nome</label><input id="nm" className="input" autoFocus required value={edit.name ?? ''} onChange={(e) => setEdit((cur) => ({ ...cur, name: e.target.value }))} /></div>
+              <ColorIconPicker logos={props.logos} color={edit.color!} icon={edit.icon!} onColor={(color) => setEdit((cur) => ({ ...cur, color }))} onIcon={(icon) => setEdit((cur) => ({ ...cur, icon }))} />
+              {props.archivable && <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4" checked={!!edit.archived} onChange={(e) => setEdit((cur) => ({ ...cur, archived: e.target.checked }))} />Arquivada (some do resumo e dos formulários)</label>}
               {error && <p role="alert" className="text-sm text-danger">{error}</p>}
             </form>
           </Sheet>
