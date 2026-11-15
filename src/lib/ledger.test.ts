@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { computeLedger, accountState, simulateExit } from './ledger'
+import { computeLedger, accountState, simulateExit, filterEvolution, type ChartPoint } from './ledger'
 import type { Tx, TxType } from './types'
 
 let n = 0
@@ -67,5 +67,34 @@ describe('simulateExit', () => {
     expect(sim.milheiroAfter).toBeCloseTo(4.938118812, 6)
     expect(sim.insufficient).toBe(false)
     expect(simulateExit(accountState(rows), 99999).insufficient).toBe(true)
+  })
+})
+
+describe('filterEvolution', () => {
+  const pts: ChartPoint[] = [
+    { date: '2024-12-10', pontos: 1000, milheiro: 30 },
+    { date: '2025-03-01', pontos: 2000, milheiro: 25 },
+    { date: '2025-06-20', pontos: 3000, milheiro: 20 },
+  ]
+  it('todo o período devolve tudo', () => {
+    expect(filterEvolution(pts, 'all', '2025', '2025-07-01')).toEqual(pts)
+  })
+  it('último mês: ponto inicial com saldo vigente e ponto final em hoje', () => {
+    const r = filterEvolution(pts, 'month', '2025', '2025-07-05')
+    expect(r[0]).toEqual({ date: '2025-06-05', pontos: 2000, milheiro: 25 })
+    expect(r[1].date).toBe('2025-06-20')
+    expect(r[r.length - 1]).toEqual({ date: '2025-07-05', pontos: 3000, milheiro: 20 })
+  })
+  it('ano específico recorta 01/01 a 31/12 (até hoje)', () => {
+    const r = filterEvolution(pts, 'calendar', '2025', '2025-07-05')
+    expect(r[0]).toEqual({ date: '2025-01-01', pontos: 1000, milheiro: 30 })
+    expect(r.map((p) => p.date)).toEqual(['2025-01-01', '2025-03-01', '2025-06-20', '2025-07-05'])
+  })
+  it('sem registros no período mantém uma linha com o saldo vigente', () => {
+    const r = filterEvolution(pts, 'week', '2025', '2025-09-01')
+    expect(r).toEqual([
+      { date: '2025-08-25', pontos: 3000, milheiro: 20 },
+      { date: '2025-09-01', pontos: 3000, milheiro: 20 },
+    ])
   })
 })

@@ -15,6 +15,7 @@ export default function CrudList<T extends Item>(props: {
   onDelete: (id: string) => Promise<unknown>
   archivable?: boolean
   logos?: boolean
+  back?: string
 }) {
   const [edit, setEdit] = useState<Partial<Item> | null>(null)
   const [confirm, setConfirm] = useState('')
@@ -33,7 +34,7 @@ export default function CrudList<T extends Item>(props: {
 
   return (
     <div>
-      <PageHeader title={props.title} subtitle={props.subtitle}
+      <PageHeader title={props.title} subtitle={props.subtitle} back={props.back}
         action={<motion.button whileTap={{ scale: 0.94 }} className="btn btn-primary !min-h-[38px] !px-3.5 !py-1.5" onClick={() => setEdit({ name: '', color: '#0b7a75', icon: props.defaultIcon })}><Plus className="h-4 w-4" />Adicionar</motion.button>} />
 
       <div className="card divide-y divide-line/60 overflow-hidden">
