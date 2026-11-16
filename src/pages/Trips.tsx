@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeftRight, Bell, BellOff, Calculator, ExternalLink, Minus, Plus, RotateCcw, Star, Trash2 } from 'lucide-react'
+import { ArrowLeftRight, ArrowUpDown, ArrowUpRight, Bell, BellOff, Calculator, ExternalLink, Minus, Plus, RotateCcw, Star, Trash2 } from 'lucide-react'
 import { useAddFavorite, useDeleteFavorite, useFavorites, usePromoItems, useToggleNotify } from '../data/hooks'
 import { airportByIata } from '../lib/airports'
 import { PROGRAMS, type TripSearch } from '../lib/tripLinks'
@@ -19,7 +19,7 @@ const addDays = (iso: string, n: number) => {
 }
 type Form = { origin: string; destination: string; depart: string; ret: string; oneWay: boolean; adults: number; children: number; infants: number }
 const KEY = 'trip-search'
-const defaults = (): Form => ({ origin: 'GRU', destination: '', depart: addDays(today(), 30), ret: addDays(today(), 37), oneWay: false, adults: 1, children: 0, infants: 0 })
+const defaults = (): Form => ({ origin: '', destination: '', depart: addDays(today(), 30), ret: addDays(today(), 37), oneWay: false, adults: 1, children: 0, infants: 0 })
 const initial = (): Form => {
   const base = defaults()
   try {
@@ -91,7 +91,10 @@ export default function Trips() {
         </div>
 
         <div className="grid items-end gap-3 sm:grid-cols-[1fr_auto_1fr]">
-          <AirportPicker id="trip-origin" label="Origem" value={f.origin} onChange={(v) => set({ origin: v })} />
+          <div className="flex items-end gap-2">
+            <div className="min-w-0 flex-1"><AirportPicker id="trip-origin" label="Origem" value={f.origin} onChange={(v) => set({ origin: v })} /></div>
+            <button type="button" aria-label="Inverter origem e destino" onClick={swap} className="sm:hidden flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-muted active:bg-line/50"><ArrowUpDown className="h-5 w-5" /></button>
+          </div>
           <button type="button" aria-label="Inverter origem e destino" onClick={swap} className="mx-auto hidden h-11 w-11 items-center justify-center rounded-full bg-line/50 text-muted sm:flex"><ArrowLeftRight className="h-4 w-4" /></button>
           <div className="flex items-end gap-2">
             <div className="min-w-0 flex-1"><AirportPicker id="trip-dest" label="Destino" value={f.destination} onChange={(v) => set({ destination: v })} /></div>
@@ -102,7 +105,7 @@ export default function Trips() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <div><label className="label" htmlFor="trip-depart">Ida</label><DateField id="trip-depart" min={today()} value={f.depart} onChange={(v) => set({ depart: v })} /></div>
           <div><label className="label" htmlFor="trip-ret">Volta</label><DateField id="trip-ret" min={f.depart || today()} disabled={f.oneWay} value={f.oneWay ? '' : f.ret} onChange={(v) => set({ ret: v })} /></div>
         </div>
@@ -113,19 +116,21 @@ export default function Trips() {
           <Stepper label="Bebês" value={f.infants} min={0} onChange={(n) => set({ infants: Math.min(n, f.adults) })} />
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-3">
-          {PROGRAMS.map((p) => valid ? (
-            <motion.a key={p.id} whileTap={{ scale: 0.97 }} href={p.url(search)} target="_blank" rel="noopener noreferrer" className="btn !justify-start gap-2.5 !px-3">
-              <img src={p.logo} alt="" className="h-7 w-7 rounded-lg object-cover" /><span className="flex-1 text-left">{p.name}</span><ExternalLink className="h-4 w-4 text-muted" />
-            </motion.a>
-          ) : (
-            <button key={p.id} type="button" disabled className="btn !justify-start gap-2.5 !px-3"><img src={p.logo} alt="" className="h-7 w-7 rounded-lg object-cover" /><span className="flex-1 text-left">{p.name}</span></button>
-          ))}
+        <div className="grid grid-cols-3 gap-2">
+          {PROGRAMS.map((p) => {
+            const inner = (<><img src={p.logo} alt="" className="h-8 w-8 rounded-lg object-cover" /><span className="hidden flex-1 text-left sm:inline">{p.name}</span><ArrowUpRight className="h-5 w-5 text-muted" /></>)
+            const cls = 'btn !justify-center gap-2 !px-3 sm:!justify-start sm:gap-2.5'
+            return valid ? (
+              <motion.a key={p.id} whileTap={{ scale: 0.97 }} href={p.url(search)} target="_blank" rel="noopener noreferrer" aria-label={`Buscar na ${p.name}`} title={p.name} className={cls}>{inner}</motion.a>
+            ) : (
+              <button key={p.id} type="button" disabled aria-label={`Buscar na ${p.name}`} title={p.name} className={cls}>{inner}</button>
+            )
+          })}
         </div>
         <p className="text-xs text-muted">{hint || 'Cada botão abre a busca com milhas já preenchida no site do programa. Preços e disponibilidade aparecem lá.'}</p>
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <Link to="/simulacao" className="inline-flex items-center gap-2 text-sm font-medium text-accent"><Calculator className="h-4 w-4" />Simular custo em milhas</Link>
-          <button type="button" disabled={pristine} onClick={reset} className="inline-flex items-center gap-1.5 text-sm font-medium text-muted disabled:opacity-40"><RotateCcw className="h-4 w-4" />Redefinir pesquisa</button>
+          <button type="button" disabled={pristine} onClick={reset} aria-label="Redefinir pesquisa" title="Redefinir pesquisa" className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full px-2.5 text-sm font-medium text-muted active:bg-line/50 disabled:opacity-40 sm:px-3"><RotateCcw className="h-5 w-5" /><span className="hidden sm:inline">Redefinir pesquisa</span></button>
         </div>
       </FadeUp>
 
@@ -145,7 +150,6 @@ export default function Trips() {
             ))}
           </ul>
         )}
-        <Link to="/config" className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-accent"><Bell className="h-4 w-4" />Ativar ou desativar avisos em Ajustes</Link>
       </FadeUp>
 
       <FadeUp i={2} className="card p-4">
