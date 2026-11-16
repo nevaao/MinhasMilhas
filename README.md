@@ -15,6 +15,19 @@ npm run dev
 npm test
 ```
 
+## Viagens e avisos de promoção
+
+A aba **Viagens** abre a busca com milhas já preenchida na Smiles, na LATAM Pass e na Azul Fidelidade, guarda destinos favoritos e avisa por notificação quando um blog de promoções cita um favorito. Os endereços de busca ficam em `src/lib/tripLinks.ts` (se algum site mudar o formato, ajuste só a função dele).
+
+Configuração no Supabase (uma vez):
+
+1. **Tabelas**: no *SQL Editor*, execute `supabase/migrations/0003_trips.sql`.
+2. **Função**: em *Edge Functions → Deploy a new function → Via Editor*, crie `promo-watch`, cole o conteúdo de `supabase/functions/promo-watch/index.ts` e faça o deploy. Em *Details*, desligue **Verify JWT**.
+3. **Agendamento**: em *Integrations → Cron → Create job*, escolha o tipo *Supabase Edge Function*, selecione `promo-watch` e use o horário `0 */2 * * *` (a cada 2 horas).
+4. **No celular**: instale o app (no iPhone, *Adicionar à Tela de Início*), abra **Viagens** e toque em *Ativar avisos neste aparelho*.
+
+Para testar sem esperar, abra `https://SEU-PROJETO.supabase.co/functions/v1/promo-watch` no navegador: a resposta mostra quantas promoções foram lidas e quantos avisos foram enviados (a função ignora chamadas repetidas em menos de 10 minutos).
+
 ## Login com Google e Microsoft
 
 Ative cada provedor em *Authentication → Sign In / Providers* no Supabase (é preciso criar as credenciais no Google Cloud e no Microsoft Entra, usando a *Callback URL* mostrada pelo Supabase) e depois defina `VITE_OAUTH_PROVIDERS=google,azure` para exibir os botões.
