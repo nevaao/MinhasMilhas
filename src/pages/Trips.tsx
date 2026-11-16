@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeftRight, Bell, BellOff, Calculator, ExternalLink, Minus, Plus, Star, Trash2 } from 'lucide-react'
+import { ArrowLeftRight, Bell, BellOff, Calculator, ExternalLink, Minus, Plus, RotateCcw, Star, Trash2 } from 'lucide-react'
 import { useAddFavorite, useDeleteFavorite, useFavorites, usePromoItems, useToggleNotify } from '../data/hooks'
 import { airportByIata } from '../lib/airports'
 import { PROGRAMS, type TripSearch } from '../lib/tripLinks'
 import { matchesDestination } from '../lib/promoMatch'
 import { fmtDate, today } from '../lib/format'
-import { currentSubscription, disablePush, enablePush, isIos, isStandalone, pushSupported, testNotification } from '../lib/push'
 import PageHeader from '../components/PageHeader'
 import AirportPicker from '../components/AirportPicker'
+import DateField from '../components/DateField'
 import { FadeUp } from '../components/motion'
 import { useToast } from '../components/Toast'
 
@@ -19,8 +19,9 @@ const addDays = (iso: string, n: number) => {
 }
 type Form = { origin: string; destination: string; depart: string; ret: string; oneWay: boolean; adults: number; children: number; infants: number }
 const KEY = 'trip-search'
+const defaults = (): Form => ({ origin: 'GRU', destination: '', depart: addDays(today(), 30), ret: addDays(today(), 37), oneWay: false, adults: 1, children: 0, infants: 0 })
 const initial = (): Form => {
-  const base: Form = { origin: 'GRU', destination: '', depart: addDays(today(), 30), ret: addDays(today(), 37), oneWay: false, adults: 1, children: 0, infants: 0 }
+  const base = defaults()
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || 'null') as Form | null
     if (saved && saved.depart >= today()) return { ...base, ...saved }
@@ -63,17 +64,14 @@ export default function Trips() {
     return promos.filter((p) => active.some((x) => matchesDestination(p.title, x))).slice(0, 10)
   }, [favs, promos])
 
-  // avisos
-  const [pushOn, setPushOn] = useState(false)
   const [busy, setBusy] = useState(false)
-  useEffect(() => { currentSubscription().then((s) => setPushOn(!!s)).catch(() => {}) }, [])
-  const iosHint = isIos() && !isStandalone()
-
   async function run(fn: () => Promise<unknown>, ok: string) {
     setBusy(true)
     try { await fn(); toast(ok) } catch (e) { toast((e as Error).message, 'error') }
     setBusy(false)
   }
+  const pristine = JSON.stringify(f) === JSON.stringify(defaults())
+  const reset = () => { setF(defaults()); try { localStorage.removeItem(KEY) } catch { /* ignora */ } toast('Pesquisa redefinida') }
   const swap = () => set({ origin: f.destination, destination: f.origin })
   const toggleFav = () => {
     if (!dest) return
@@ -97,7 +95,7 @@ export default function Trips() {
           <button type="button" aria-label="Inverter origem e destino" onClick={swap} className="mx-auto hidden h-11 w-11 items-center justify-center rounded-full bg-line/50 text-muted sm:flex"><ArrowLeftRight className="h-4 w-4" /></button>
           <div className="flex items-end gap-2">
             <div className="min-w-0 flex-1"><AirportPicker id="trip-dest" label="Destino" value={f.destination} onChange={(v) => set({ destination: v })} /></div>
-            <button type="button" aria-label={fav ? 'Remover dos favoritos' : 'Favoritar destino'} aria-pressed={!!fav} disabled={!dest} onClick={toggleFav}
+            <button type="button" aria-label={fav ? 'Remover dos favoritos' : 'Favoritar destino'} aria-pressed={!!fav} disabled={!dest || busy} onClick={toggleFav}
               className={`flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-xl border border-line ${fav ? 'bg-accent/10 text-accent' : 'bg-surface text-muted'} disabled:opacity-40`}>
               <Star className={`h-5 w-5 ${fav ? 'fill-current' : ''}`} />
             </button>
@@ -105,8 +103,8 @@ export default function Trips() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div><label className="label" htmlFor="trip-depart">Ida</label><input id="trip-depart" type="date" className="input" min={today()} value={f.depart} onChange={(e) => set({ depart: e.target.value })} /></div>
-          <div><label className="label" htmlFor="trip-ret">Volta</label><input id="trip-ret" type="date" className="input disabled:opacity-40" min={f.depart || today()} disabled={f.oneWay} value={f.oneWay ? '' : f.ret} onChange={(e) => set({ ret: e.target.value })} /></div>
+          <div><label className="label" htmlFor="trip-depart">Ida</label><DateField id="trip-depart" min={today()} value={f.depart} onChange={(v) => set({ depart: v })} /></div>
+          <div><label className="label" htmlFor="trip-ret">Volta</label><DateField id="trip-ret" min={f.depart || today()} disabled={f.oneWay} value={f.oneWay ? '' : f.ret} onChange={(v) => set({ ret: v })} /></div>
         </div>
 
         <div className="grid gap-2 sm:grid-cols-3">
@@ -125,7 +123,10 @@ export default function Trips() {
           ))}
         </div>
         <p className="text-xs text-muted">{hint || 'Cada botão abre a busca com milhas já preenchida no site do programa. Preços e disponibilidade aparecem lá.'}</p>
-        <Link to="/simulacao" className="inline-flex items-center gap-2 text-sm font-medium text-accent"><Calculator className="h-4 w-4" />Simular custo em milhas</Link>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link to="/simulacao" className="inline-flex items-center gap-2 text-sm font-medium text-accent"><Calculator className="h-4 w-4" />Simular custo em milhas</Link>
+          <button type="button" disabled={pristine} onClick={reset} className="inline-flex items-center gap-1.5 text-sm font-medium text-muted disabled:opacity-40"><RotateCcw className="h-4 w-4" />Redefinir pesquisa</button>
+        </div>
       </FadeUp>
 
       <FadeUp i={1} className="card p-4">
@@ -144,22 +145,10 @@ export default function Trips() {
             ))}
           </ul>
         )}
+        <Link to="/config" className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-accent"><Bell className="h-4 w-4" />Ativar ou desativar avisos em Ajustes</Link>
       </FadeUp>
 
-      <FadeUp i={2} className="card space-y-3 p-4">
-        <h2 className="font-semibold">Avisos de promoção</h2>
-        <p className="text-sm text-muted">Você recebe uma notificação neste aparelho quando uma promoção citar um destino favorito com o sino ligado. As promoções vêm de blogs especializados e são verificadas a cada 2 horas.</p>
-        {!pushSupported() ? <p className="text-sm text-danger">Este navegador não suporta notificações.</p>
-          : iosHint ? <p className="text-sm text-muted">No iPhone, adicione o app à Tela de Início (Compartilhar → Adicionar à Tela de Início) e abra por lá para ativar os avisos (iOS 16.4 ou mais novo).</p>
-          : pushOn ? (
-            <div className="flex flex-wrap gap-2">
-              <button className="btn" disabled={busy} onClick={() => run(testNotification, 'Aviso de teste enviado')}>Testar aviso</button>
-              <button className="btn btn-danger" disabled={busy} onClick={() => run(async () => { await disablePush(); setPushOn(false) }, 'Avisos desativados')}>Desativar neste aparelho</button>
-            </div>
-          ) : <button className="btn btn-primary" disabled={busy} onClick={() => run(async () => { await enablePush(); setPushOn(true) }, 'Avisos ativados')}><Bell className="h-4 w-4" />Ativar avisos neste aparelho</button>}
-      </FadeUp>
-
-      <FadeUp i={3} className="card p-4">
+      <FadeUp i={2} className="card p-4">
         <h2 className="mb-3 font-semibold">Promoções para seus favoritos</h2>
         {favs.length === 0 ? <p className="text-sm text-muted">Favorite destinos para ver as promoções aqui.</p>
           : matched.length === 0 ? <p className="text-sm text-muted">Nenhuma promoção recente para seus favoritos.</p>

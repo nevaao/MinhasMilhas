@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase'
 import { useTheme, type ThemePref } from '../lib/theme'
 import { useAccounts, useCategories, useTransactions } from '../data/hooks'
 import ImportXlsx from '../components/ImportXlsx'
+import PromoAlerts from '../components/PromoAlerts'
 import PageHeader from '../components/PageHeader'
 import { FadeUp } from '../components/motion'
 
@@ -26,7 +27,7 @@ export default function Settings() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
-      <PageHeader title="Ajustes" subtitle="Contas, categorias, tema, dados e conta." />
+      <PageHeader title="Ajustes" subtitle="Contas, categorias, tema, avisos, dados e conta." />
       <FadeUp i={0} className="card divide-y divide-line/60 overflow-hidden md:hidden">
         {[['/contas', 'Contas', Wallet], ['/categorias', 'Categorias', Tag]].map(([to, label, I]) => {
           const Ico = I as typeof Wallet
@@ -49,13 +50,14 @@ export default function Settings() {
           ))}
         </div>
       </FadeUp>
-      <FadeUp i={2}><ImportXlsx /></FadeUp>
-      <FadeUp i={3} className="card space-y-3 p-4">
+      <FadeUp i={2} className="card p-4"><PromoAlerts /></FadeUp>
+      <FadeUp i={3}><ImportXlsx /></FadeUp>
+      <FadeUp i={4} className="card space-y-3 p-4">
         <h2 className="font-semibold">Seus dados</h2>
         <p className="text-sm text-muted">Baixe uma cópia de contas, categorias e registros.</p>
         <button className="btn" onClick={exportJson}>Exportar JSON</button>
       </FadeUp>
-      <FadeUp i={4} className="card space-y-3 p-4">
+      <FadeUp i={5} className="card space-y-3 p-4">
         <h2 className="font-semibold">Conta</h2>
         <p className="break-all text-sm text-muted">{session?.user.email}</p>
         <button className="btn" onClick={() => supabase.auth.signOut()}>Sair</button>

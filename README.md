@@ -24,7 +24,7 @@ Configuração no Supabase (uma vez):
 1. **Tabelas**: no *SQL Editor*, execute `supabase/migrations/0003_trips.sql`.
 2. **Função**: em *Edge Functions → Deploy a new function → Via Editor*, crie `promo-watch`, cole o conteúdo de `supabase/functions/promo-watch/index.ts` e faça o deploy. Em *Details*, desligue **Verify JWT**.
 3. **Agendamento**: em *Integrations → Cron → Create job*, escolha o tipo *Supabase Edge Function*, selecione `promo-watch` e use o horário `0 */2 * * *` (a cada 2 horas).
-4. **No celular**: instale o app (no iPhone, *Adicionar à Tela de Início*), abra **Viagens** e toque em *Ativar avisos neste aparelho*.
+4. **No celular**: instale o app (no iPhone, *Adicionar à Tela de Início*), abra **Ajustes** e, em *Avisos de promoção*, toque em *Ativar avisos neste aparelho*. Depois, em **Viagens**, favorite os destinos e deixe o sino ligado.
 
 Para testar sem esperar, abra `https://SEU-PROJETO.supabase.co/functions/v1/promo-watch` no navegador: a resposta mostra quantas promoções foram lidas e quantos avisos foram enviados (a função ignora chamadas repetidas em menos de 10 minutos).
 
