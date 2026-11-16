@@ -70,38 +70,6 @@ export function accountState(rows: LedgerRow[]): AccountState {
     : { points: 0, totalCost: 0, milheiro: 0 }
 }
 
-export interface ChartPoint {
-  date: string
-  pontos: number
-  milheiro: number
-}
-
-/** Evolução de pontos × milheiro para um conjunto de contas (um ponto por dia). */
-export function evolution(rowsByAccount: Record<string, LedgerRow[]>): ChartPoint[] {
-  const events = Object.entries(rowsByAccount).flatMap(([acc, rows]) =>
-    rows.map((r, i) => ({ acc, r, i })),
-  )
-  events.sort(
-    (a, b) =>
-      a.r.tx.date.localeCompare(b.r.tx.date) ||
-      a.r.tx.created_at.localeCompare(b.r.tx.created_at) ||
-      a.i - b.i,
-  )
-  const state: Record<string, { p: number; c: number }> = {}
-  const byDate = new Map<string, ChartPoint>()
-  for (const { acc, r } of events) {
-    state[acc] = { p: r.pointsAfter, c: r.totalCostAfter }
-    let p = 0
-    let c = 0
-    for (const s of Object.values(state)) {
-      p += s.p
-      c += s.c
-    }
-    byDate.set(r.tx.date, { date: r.tx.date, pontos: p, milheiro: milheiro(c, p) })
-  }
-  return [...byDate.values()]
-}
-
 export interface ExitSimulation {
   /** Custo da saída (equivale à coluna "Custo da saída/passagem" da planilha). */
   cost: number
@@ -118,38 +86,4 @@ export function simulateExit(state: AccountState, points: number): ExitSimulatio
   const pointsAfter = Math.max(state.points - points, 0)
   const totalCostAfter = pointsAfter > 0 ? Math.max(state.totalCost - cost, 0) : 0
   return { cost, pointsAfter, totalCostAfter, milheiroAfter: milheiro(totalCostAfter, pointsAfter), insufficient }
-}
-
-export type PeriodKey = 'all' | 'week' | 'month' | 'quarter' | 'year' | 'calendar'
-
-const addDays = (iso: string, n: number) => {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10)
-}
-const ROLLING: Partial<Record<PeriodKey, number>> = { week: 7, month: 30, quarter: 90, year: 365 }
-
-/** Intervalo de datas (inclusive) de um período; `calendar` usa o ano informado. */
-export function periodRange(key: PeriodKey, year: string, today: string): { start: string; end: string } | null {
-  if (key === 'all') return null
-  if (key === 'calendar') return { start: `${year}-01-01`, end: `${year}-12-31` }
-  return { start: addDays(today, -(ROLLING[key] ?? 0)), end: today }
-}
-
-/**
- * Recorta a evolução ao período. Acrescenta um ponto na data inicial com o saldo vigente e,
- * se o período ainda está em andamento, outro na data final, para a linha cobrir o intervalo todo.
- */
-export function filterEvolution(points: ChartPoint[], key: PeriodKey, year: string, today: string): ChartPoint[] {
-  const range = periodRange(key, year, today)
-  if (!range) return points
-  const { start, end } = range
-  const before = [...points].reverse().find((p) => p.date < start)
-  const inside = points.filter((p) => p.date >= start && p.date <= end)
-  const out: ChartPoint[] = []
-  if (before && !(inside[0] && inside[0].date === start)) out.push({ ...before, date: start })
-  out.push(...inside)
-  const last = out[out.length - 1]
-  const stop = end < today ? end : today
-  if (last && last.date < stop) out.push({ ...last, date: stop })
-  return out
 }
