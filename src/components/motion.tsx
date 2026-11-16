@@ -1,4 +1,3 @@
-import { useEffect, useState, type ReactNode } from 'react'
 import { motion, type HTMLMotionProps } from 'framer-motion'
 import { Link, useLocation, type LinkProps } from 'react-router-dom'
 
@@ -20,13 +19,3 @@ export function OverlayLink(props: LinkProps) {
 }
 
 export const tap = { whileTap: { scale: 0.97 } }
-
-/** Monta o conteúdo pesado (ex.: gráfico) logo depois do primeiro quadro, para a troca de tela não travar. */
-export function Defer({ children, fallback = null }: { children: ReactNode; fallback?: ReactNode }) {
-  const [ready, setReady] = useState(false)
-  useEffect(() => {
-    const id = setTimeout(() => setReady(true), 60)
-    return () => clearTimeout(id)
-  }, [])
-  return <>{ready ? children : fallback}</>
-}

@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 import { motion } from 'framer-motion'
 import Sheet from '../components/Sheet'
 import Select from '../components/Select'
+import DateField from '../components/DateField'
 import { useToast } from '../components/Toast'
 import { useAccounts, useCategories, useCreateTransfer, useDeleteTx, useSaveTx, useTransactions } from '../data/hooks'
 import { computeLedger } from '../lib/ledger'
@@ -152,9 +153,9 @@ export default function TxForm() {
             {mode === 'transferencia'
               ? <div><label className="label" htmlFor="to">Destino</label>
                   <Select id="to" value={toAccount} onChange={setToAccount} options={active.map((a) => ({ value: a.id, label: a.name, color: a.color }))} /></div>
-              : <div><label className="label" htmlFor="date">Data</label><input id="date" type="date" className="input" required value={date} onChange={(e) => setDate(e.target.value)} /></div>}
+              : <div><label className="label" htmlFor="date">Data</label><DateField id="date" required value={date} onChange={setDate} /></div>}
           </div>
-          {mode === 'transferencia' && <div><label className="label" htmlFor="date">Data</label><input id="date" type="date" className="input" required value={date} onChange={(e) => setDate(e.target.value)} /></div>}
+          {mode === 'transferencia' && <div><label className="label" htmlFor="date">Data</label><DateField id="date" required value={date} onChange={setDate} /></div>}
           <div><label className="label" htmlFor="desc">Descrição</label><input id="desc" className="input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex.: Clube Smiles, passagem para Bonito" /></div>
           <div><label className="label" htmlFor="cat">Categoria</label>
             <Select id="cat" value={category} onChange={setCategory} options={[{ value: '', label: 'Sem categoria' }, ...categories.map((c) => ({ value: c.id, label: c.name, color: c.color }))]} /></div>
