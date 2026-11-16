@@ -84,3 +84,19 @@ export const useDeleteTx = () =>
   ['transactions'])
 export const useCreateTransfer = () =>
   useInvalidating(async (p: Record<string, unknown>) => must(await supabase.rpc('create_transfer', p)), ['transactions'])
+
+// ---- Viagens ----
+export interface Favorite { id: string; iata: string; city: string; country: string; notify: boolean }
+export interface PromoItem { guid: string; title: string; link: string; source: string; published_at: string }
+
+export const useFavorites = () =>
+  useQuery({ queryKey: ['favorites'], queryFn: async () => must(await supabase.from('favorite_destinations').select('*').order('created_at')) as Favorite[] })
+export const usePromoItems = () =>
+  useQuery({ queryKey: ['promos'], queryFn: async () => must(await supabase.from('promo_items').select('*').order('published_at', { ascending: false }).limit(80)) as PromoItem[] })
+export const useAddFavorite = () =>
+  useInvalidating(async (f: { iata: string; city: string; country: string }) =>
+    must(await supabase.from('favorite_destinations').upsert({ ...f, notify: true }, { onConflict: 'user_id,iata' })), ['favorites'])
+export const useToggleNotify = () =>
+  useInvalidating(async (f: { id: string; notify: boolean }) => must(await supabase.from('favorite_destinations').update({ notify: f.notify }).eq('id', f.id)), ['favorites'])
+export const useDeleteFavorite = () =>
+  useInvalidating(async (id: string) => must(await supabase.from('favorite_destinations').delete().eq('id', id)), ['favorites'])

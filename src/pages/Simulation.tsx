@@ -32,7 +32,7 @@ export default function Simulation() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <PageHeader title="Simulação" subtitle="Veja quanto custa uma emissão sem registrar nada." />
+      <PageHeader back="/viagens" title="Simulação" subtitle="Veja quanto custa uma emissão sem registrar nada." />
 
       <div className="card space-y-4 p-4">
         <div>

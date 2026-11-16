@@ -1,17 +1,18 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { LayoutDashboard, List, Wallet, Settings, Tag, Plus, Calculator } from 'lucide-react'
+import { LayoutDashboard, List, Wallet, Settings, Tag, Plus, Calculator, Plane } from 'lucide-react'
 import { OverlayLink } from './motion'
 
 const nav = {
   resumo: { to: '/', label: 'Resumo', icon: LayoutDashboard },
   registros: { to: '/registros', label: 'Registros', icon: List },
+  viagens: { to: '/viagens', label: 'Viagens', icon: Plane },
   simulacao: { to: '/simulacao', label: 'Simulação', icon: Calculator },
   contas: { to: '/contas', label: 'Contas', icon: Wallet },
   categorias: { to: '/categorias', label: 'Categorias', icon: Tag },
   ajustes: { to: '/config', label: 'Ajustes', icon: Settings },
 }
-const side = [nav.resumo, nav.registros, nav.simulacao, nav.contas, nav.categorias, nav.ajustes]
+const side = [nav.resumo, nav.registros, nav.viagens, nav.simulacao, nav.contas, nav.categorias, nav.ajustes]
 
 function Tab({ to, label, icon: I, id, also = [] }: { to: string; label: string; icon: typeof List; id: string; also?: string[] }) {
   const { pathname } = useLocation()
@@ -60,7 +61,7 @@ export default function Layout({ pathKey }: { pathKey: string }) {
               <OverlayLink to="/novo" aria-label="Novo registro" className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-fg shadow-float ring-4 ring-bg"><Plus className="h-7 w-7" /></OverlayLink>
             </motion.div>
           </div>
-          <Tab {...nav.simulacao} id="tab" />
+          <Tab {...nav.viagens} id="tab" also={['/simulacao']} />
           <Tab {...nav.ajustes} id="tab" also={['/contas', '/categorias']} />
         </div>
       </nav>
